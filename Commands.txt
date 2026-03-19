@@ -11,3 +11,10 @@ netstat -ano | findstr :5000
 to remove the process running on port 5000
 
 taskkill /F /PID 12716
+
+
+
+mongodb+srv://MananSinghmaggo:omsairam786@cluster0.c5ndyiu.mongodb.net/smartwaste
+
+gatemananmaggo@gmail.com 
+Manan_1509
