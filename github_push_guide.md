@@ -57,4 +57,6 @@ git push -u origin main
       2. `git rm --cached "Smartwaste Management App"`
       3. `git add .`
       4. `git commit -m "Convert submodule to normal folder"`
+- **Easiest Alternative (GitHub Desktop)**:
+    - Since you have **GitHub Desktop** installed, just open it, select **File > Add local repository**, choose your project folder, and it will handle the authentication and pushing for you with a single click!
 - **Case Sensitivity**: Windows is case-insensitive, but GitHub is not. Ensure your file paths match exactly.
