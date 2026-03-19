@@ -58,6 +58,7 @@ app.get('/api/status', (req, res) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server initialized on port ${PORT}`);
-    console.log(`Local Access: http://localhost:${PORT}`);
-    console.log(`Network Access: http://192.168.1.3:${PORT}`);
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`Local Access: http://localhost:${PORT}`);
+    }
 });
