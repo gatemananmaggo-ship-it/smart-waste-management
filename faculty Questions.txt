@@ -1,0 +1,15 @@
+Problems with current system:
+
+1. How can we explain the interface useage to some who not know any thing about websites or we applications(like sweppers and garbage collection team).
+
+ Solution: we can generate a simple interface with less options and with simple language. just with live map preview showing the garbage bins and sweppers location.and also the shortest path to the garbage bins.
+
+
+
+2. how can we provide wi-fi services to every hardware in the garbage bins in the whole campus. 
+
+
+ Solution: we can provide wi-fi services to every hardware in the garbage bins in the whole campus by using lora technology. 
+
+ what is lora technology?
+ ans: LoRa (Long Range) is a low-power, wide-area network (LPWAN) technology that enables long-range communication between devices with low power consumption. It is widely used in IoT applications for communication between devices and gateways. 

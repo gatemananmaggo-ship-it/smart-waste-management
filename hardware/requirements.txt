@@ -1,0 +1,26 @@
+1. Required Sensor Type
+
+The code uses ultrasonic technology to measure the fill level.
+
+Required Sensor: HC-SR04 Ultrasonic Distance Sensor (or a compatible equivalent, like the US-100 in pulse mode).
+
+How it works: It works on the principle of echolocation. The code triggers the sensor to emit a high-frequency sound pulse. The sensor then waits for the echo of that pulse to reflect off the nearest object (the trash). The time this echo takes to return is measured and converted into distance.
+
+Why this type: It is inexpensive, readily available, and provides non-contact distance measurement, which is crucial for a hygienic application like a trash bin.
+
+2. Hardware Configuration (Wiring)
+The bin_sensor.ino defines specific pin connections for the ESP32 microcontroller :
+
+TRIG_PIN: Connected to GPIO 5. This pin receives the "trigger" signal from the ESP32, telling the sensor to send a pulse .
+
+ECHO_PIN: Connected to GPIO 18. This pin sends a signal back to the ESP32, which stays high for the duration the ultrasonic pulse is traveling .
+
+VCC: Connects to 5V power.
+
+GND: Connects to Ground.
+
+3. Software Configuration (Calibration)
+The core logic of the smart bin relies on the calibration constants defined at the beginning of the code . These values map the raw physical distance (in centimeters) to a meaningful "Fill Level" percentage (0-100%)
+
+4. Logic SummaryDistance Measurement: The ESP32 measures the raw distance to the trash .Constraint: The system forces the measurement to be within the allowed window: if the distance is 60cm (beyond the calibrated empty point), it is treated as 50cm. If it is 2cm (overflowing), it is treated as 5cm .Mapping: The code performs an inverse mapping :50 cm distance maps to 0% Fill Level.5 cm distance maps to 100% Fill Level.Status Classification: The code then categorizes the calculated percentage into a human-readable status :Fill Level $\ge$ 90%: FullFill Level $\le$ 10%: Empty
+Otherwise: Filling

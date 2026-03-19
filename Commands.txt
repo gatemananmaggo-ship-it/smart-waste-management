@@ -1,0 +1,13 @@
+Change the fill level of the bins in the database to 90
+in backend run 
+
+node -e "const axios = require('axios'); axios.patch('http://localhost:5000/api/bins/bin45', { fillLevel: 90, status: 'Full' }).then(r => console.log('Successfully updated bin45')).catch(e => { if (e.response && e.response.status === 404) { axios.post('http://localhost:5000/api/bins', { hardwareId: 'bin45', address: 'AKGEC Campus', location: { latitude: 28.6757, longitude: 77.5020 }, fillLevel: 90, status: 'Full' }).then(r => console.log('Successfully created bin45')).catch(e2 => console.error('Failed:', e2.message)); } else { console.error('Failed:', e.message); } })"
+
+to see which process is running on port 5000
+
+netstat -ano | findstr :5000
+
+
+to remove the process running on port 5000
+
+taskkill /F /PID 12716
