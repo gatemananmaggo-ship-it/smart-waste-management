@@ -30,6 +30,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/bins', binRoutes);
 app.use('/api/profile', profileRoutes);
 
+// Root Route
+app.get('/', (req, res) => {
+    res.send('Smart Waste Management API is running. Access /api/status for health check.');
+});
+
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Successfully connected to MongoDB'))

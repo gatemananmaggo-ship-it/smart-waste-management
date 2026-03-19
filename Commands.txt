@@ -24,4 +24,4 @@ MongoDB Atlas:
 MananSinghMaggo
 7LszMiqVzJ_WtY
 
-mongodb+srv://MananSinghMaggo:7LszMiqVzJ_WtY@cluster0.xgoxfe7.mongodb.net/?appName=Cluster0
+mongodb+srv://MananSinghMaggo:7LszMiqVzJ_WtY@cluster0.lp0ncvh.mongodb.net/?appName=Cluster0
