@@ -43,9 +43,18 @@ git push -u origin main
 ```
 
 ## 4. Troubleshooting
-- **Permission Denied (403 Error)**: This happens when the GitHub account logged into your computer doesn't have write access to the repository.
-    - **Step 1**: Check your current user: `git config user.name` and `git config user.email`.
-    - **Step 2**: If the repository belongs to a different account (like `gatemananmaggo-ship-it`), ensure your account (`maggomanansingh`) is added as a **Collaborator** in the GitHub repository settings.
-    - **Step 3**: Try using a **Personal Access Token (PAT)**. When Git asks for a password, use the token instead of your GitHub password. [How to create a PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-    - **Step 4**: Alternatively, try using the SSH URL if you have SSH keys set up: `git remote set-url origin git@github.com:gatemananmaggo-ship-it/smart-waste-management.git`.
+- **Permission Denied (403 Error)**: This means GitHub doesn't recognize you as having permission to write to this repository.
+    - **The Easiest Fix (Personal Access Token)**:
+      1. Go to GitHub **Settings** > **Developer settings** > **Personal access tokens** > **Tokens (classic)**.
+      2. Click **Generate new token (classic)**. Give it a name and select the **'repo'** scope.
+      3. **Copy the token** (you won't see it again!).
+      4. Run this command to include your token in the URL:
+         `git remote set-url origin https://YOUR_TOKEN@github.com/gatemananmaggo-ship-it/smart-waste-management.git`
+      5. Try `git push -u origin main` again.
+- **Missing Folders / Submodules (mode 160000)**: If `Smartwaste Management App` appears as a "grey folder" on GitHub:
+    - **Fix**: Run these commands in your project root:
+      1. `rm -rf "Smartwaste Management App/.git"` (Deletes the hidden folder)
+      2. `git rm --cached "Smartwaste Management App"`
+      3. `git add .`
+      4. `git commit -m "Convert submodule to normal folder"`
 - **Case Sensitivity**: Windows is case-insensitive, but GitHub is not. Ensure your file paths match exactly.
