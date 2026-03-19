@@ -41,8 +41,6 @@ const BinMap = ({ bins, height = '450px' }) => {
             navigator.geolocation.getCurrentPosition((position) => {
                 const pos = [position.coords.latitude, position.coords.longitude];
                 setUserPosition(pos);
-                // Optionally center on user if no registration info is better
-                // setMapCenter(pos);
             });
         }
 
@@ -57,7 +55,6 @@ const BinMap = ({ bins, height = '450px' }) => {
                     if (data && data.length > 0) {
                         setMapCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
                     } else {
-                        // Try fallback to just city
                         const cityResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(user.city + ', ' + user.state)}&limit=1`);
                         const cityData = await cityResponse.json();
                         if (cityData && cityData.length > 0) {
@@ -71,6 +68,19 @@ const BinMap = ({ bins, height = '450px' }) => {
             fetchCityCoords();
         }
     }, [user]);
+
+    // Recenter map when bins change
+    const FitBounds = ({ bins }) => {
+        const map = useMap();
+        useEffect(() => {
+            const validBins = bins.filter(b => b.location && typeof b.location.latitude === 'number' && typeof b.location.longitude === 'number');
+            if (validBins.length > 0) {
+                const bounds = L.latLngBounds(validBins.map(b => [b.location.latitude, b.location.longitude]));
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+        }, [bins, map]);
+        return null;
+    };
 
     const handleGetDirections = async (bin) => {
         if (!userPosition || !bin.location) return;
@@ -130,6 +140,7 @@ const BinMap = ({ bins, height = '450px' }) => {
 
                 />
                 <RecenterMap center={mapCenter} />
+                <FitBounds bins={bins} />
                 {bins.map((bin) => {
                     if (!bin.location || typeof bin.location.latitude !== 'number' || typeof bin.location.longitude !== 'number') {
                         console.warn(`Bin ${bin.hardwareId} has invalid or missing location:`, bin.location);
