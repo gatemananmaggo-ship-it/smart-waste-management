@@ -1,7 +1,7 @@
 // Centralized API configuration for the frontend
 // Update this to your live Render URL (e.g., 'https://smart-waste-api.onrender.com')
 // Or use 'http://localhost:5000' for local testing
-const BASE_URL = 'https://smart-waste-api.onrender.com';
+const BASE_URL = 'https://smart-waste-api-epmw.onrender.com';
 
 const CONFIG = {
     API_BASE_URL: BASE_URL,
