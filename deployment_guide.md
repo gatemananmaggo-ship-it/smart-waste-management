@@ -27,12 +27,24 @@ Your live server cannot reach your computer's local database.
    - `JWT_SECRET`: Any random string (e.g., `smartwaste_secret_2024`).
 6. Click **Deploy**.
 
-## 3. Update Mobile App
-Once Render gives you a URL (e.g., `https://smart-waste-api.onrender.com`):
-1. Open `mobile/Config.ts` (or your config file).
-2. Update the `BASE_URL` to your new Render URL.
-3. Re-build the mobile app.
+## 3. Frontend Deployment (Render.com)
+1. In Render, click **New +** > **Static Site**.
+2. Connect your GitHub repository.
+3. **Settings**:
+   - **Name**: `smart-waste-web`
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist`
+4. Click **Deploy**.
 
-## 4. Hardware Update (ESP32)
-1. Update the `serverAddress` in your ESP32 code to the new Render URL.
-2. Note: Render uses `HTTPS` (port 443). Ensure your ESP32 code uses `WiFiClientSecure`.
+## 4. Update Mobile App
+Once your backend is live (e.g., `https://smart-waste-api-epmw.onrender.com`):
+1. I have updated [**`mobile/constants/Config.ts`**](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/mobile/constants/Config.ts) for you. 
+2. Just re-load your Expo app!
+
+## 5. Troubleshooting "ECONNREFUSED"
+If `node seed_cloud.js` fails with `ECONNREFUSED`, follow these steps:
+1. **DNS Issue**: Your internet provider might be blocking Atlas DNS. Try changing your PC DNS to Google (**8.8.8.8**) or Cloudflare (**1.1.1.1**).
+2. **Standard String**: In `seed_cloud.js`, try using the "Standard Connection String" (the one for older Drivers) which doesn't use the `srv` prefix:
+   - Example: `mongodb://<user>:<pass>@cluster0-shard-00-00.lp0ncvh.mongodb.net:27017,...`
+   - You can get this from MongoDB Atlas > Connect > Drivers > Select Node.js version 2.2.12 or similar.
