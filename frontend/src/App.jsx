@@ -25,8 +25,31 @@ function App() {
   const [bins, setBins] = useState([]);
   const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'online', 'offline'
   const [activeView, setActiveView] = useState('overview');
   const [showAddBin, setShowAddBin] = useState(false);
+
+  const checkBackendStatus = async () => {
+    setBackendStatus('checking');
+    try {
+      console.log('Checking backend status at:', `${CONFIG.API_BASE_URL}/api/status`);
+      const response = await axios.get(`${CONFIG.API_BASE_URL}/api/status`, { timeout: 5000 });
+      if (response.data && response.data.status === 'Active') {
+        console.log('Backend is online');
+        setBackendStatus('online');
+        return true;
+      }
+      throw new Error('Invalid backend response');
+    } catch (err) {
+      console.error('Backend status check failed:', err);
+      setBackendStatus('offline');
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    checkBackendStatus();
+  }, []);
 
   useEffect(() => {
     // Initial data fetch
@@ -91,7 +114,7 @@ function App() {
           return updated.slice(-30);
         });
       });
-    } else if (!authLoading) {
+    } else if (!authLoading && backendStatus !== 'checking') {
       setLoading(false);
     }
 
@@ -99,7 +122,7 @@ function App() {
       socket.off('binUpdate');
       socket.off('trendUpdate');
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, backendStatus]);
 
   const handleBinAdded = (newBin) => {
     setBins(prev => [...prev, newBin]);
@@ -131,7 +154,67 @@ function App() {
   const lowBattery = bins.filter(b => b.batteryLevel < 20).length;
   const healthyBins = bins.filter(b => b.status !== 'Full' && b.batteryLevel >= 20).length;
 
-  if (authLoading || loading) {
+  if (backendStatus === 'offline') {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'radial-gradient(circle at center, #1e1b4b 0%, #020617 100%)',
+        color: 'white',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          padding: '40px',
+          borderRadius: '24px',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          maxWidth: '400px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+        }}>
+          <AlertTriangle size={64} color="#ef4444" style={{ marginBottom: '24px' }} />
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '12px' }}>Server Unreachable</h2>
+          <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '32px', lineHeight: 1.6 }}>
+            We're having trouble connecting to the EcoSmart Cloud server. Please check your internet connection or try again.
+          </p>
+          <button
+            onClick={checkBackendStatus}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: 'linear-gradient(135deg, #ef4444, #991b1b)',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.4)';
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(239, 68, 68, 0.3)';
+            }}
+          >
+            Retry Connection
+          </button>
+          <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
+            Endpoint: {CONFIG.API_BASE_URL}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading || loading || backendStatus === 'checking') {
     return (
       <div style={{
         display: 'flex',
@@ -176,7 +259,9 @@ function App() {
           <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '8px' }}>
             EcoSmart <span style={{ color: '#38bdf8' }}>Cloud</span>
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>Optimizing urban waste networks...</p>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+            {backendStatus === 'checking' ? 'Establishing secure connection...' : 'Optimizing urban waste networks...'}
+          </p>
         </div>
 
         <style>{`
