@@ -15,7 +15,8 @@
         "NSLocationWhenInUseUsageDescription": "This app uses your location to show where you are relative to the waste bins.",
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -58,6 +59,12 @@
         "projectId": "a9d49441-5e46-4031-b998-33ab613ec48e"
       }
     },
-    "owner": "manan2410182s-organization"
+    "owner": "manan2410182s-organization",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a9d49441-5e46-4031-b998-33ab613ec48e"
+    }
   }
 }
