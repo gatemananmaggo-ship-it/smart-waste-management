@@ -1,5 +1,5 @@
 // Centralized API configuration for the frontend
-const IS_LOCAL = true; // Change to false to use the live Render server
+const IS_LOCAL = false; // Change to false to use the live Render server
 
 const LOCAL_URL = 'http://192.168.1.6:5000';
 const LIVE_URL = 'https://smart-waste-api-epmw.onrender.com';
