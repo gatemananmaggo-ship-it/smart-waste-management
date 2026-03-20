@@ -56,15 +56,12 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a9d49441-5e46-4031-b998-33ab613ec48e"
+        "projectId": "dace32e3-260a-4d2d-b45f-5a70362ff2d4"
       }
     },
-    "owner": "manan2410182s-organization",
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/a9d49441-5e46-4031-b998-33ab613ec48e"
-    }
+    "owner": "manan2410182s-organization"
   }
 }
