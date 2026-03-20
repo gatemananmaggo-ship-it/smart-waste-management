@@ -1,6 +1,10 @@
 // Centralized API configuration for the mobile app
-// Update this to your live Render URL
-const BASE_URL = 'https://smart-waste-api-epmw.onrender.com';
+const IS_LOCAL = false; // Change to false to use the live Render server
+
+const LOCAL_URL = 'http://192.168.1.6:5000';
+const LIVE_URL = 'https://smart-waste-api-epmw.onrender.com';
+
+const BASE_URL = IS_LOCAL ? LOCAL_URL : LIVE_URL;
 
 const CONFIG = {
     API_BASE_URL: `${BASE_URL}/api`,
