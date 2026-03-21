@@ -10,8 +10,11 @@
 const char* ssid = "Airtel_Raptor 5g";
 const char* password = "up80gd0383";
 
-// computer's local IP (e.g. http://192.168.1.5:5000/api/bins/BIN-001)
-const char* serverPath = "http://192.168.1.3:5000/api/bins/BIN-001";
+// The unique ID for this specific bin (must match the one registered in the web UI)
+const char* hardwareId = "BIN-001";
+
+// Server base URL (e.g. http://192.168.1.3:5000)
+const char* serverBaseUrl = "http://192.168.1.3:5000";
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY
@@ -78,7 +81,8 @@ void loop() {
   // 3. Send to Cloud (if WiFi is connected)
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
-    http.begin(serverPath);
+    String fullUrl = String(serverBaseUrl) + "/api/bins/" + String(hardwareId);
+    http.begin(fullUrl);
     http.addHeader("Content-Type", "application/json");
 
     // Construct JSON payload
