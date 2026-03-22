@@ -27,6 +27,11 @@ Your live server cannot reach your computer's local database.
    - `JWT_SECRET`: Any random string (e.g., `smartwaste_secret_2024`).
 6. Click **Deploy**.
 
+---
+> [!NOTE]
+> **Persistent Hosting (Alternative)**: Render's free tier "sleeps" after 15 minutes of inactivity. For a backend that stays 100% active, I recommend **Oracle Cloud Infrastructure (OCI)**'s Always Free tier. See my [OCI Deployment Guide](file:///C:/Users/DELL/.gemini/antigravity/brain/d67b909c-3ce5-4bff-8e76-1d6068a9b7e8/oci_deployment_guide.md) for details.
+---
+
 ## 3. Frontend Deployment (Render.com)
 1. In Render, click **New +** > **Static Site**.
 2. Connect your GitHub repository.
