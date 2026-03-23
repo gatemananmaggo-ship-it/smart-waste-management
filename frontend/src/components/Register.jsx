@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, MapPin, User, LogIn, Globe, Map, Home } from 'lucide-react';
+import { Mail, Lock, MapPin, User, LogIn, Globe, Map, Home, Phone } from 'lucide-react';
 
 const Register = ({ onToggle }) => {
     const [formData, setFormData] = useState({
@@ -10,7 +10,8 @@ const Register = ({ onToggle }) => {
         area_access: '',
         state: '',
         city: '',
-        place: ''
+        place: '',
+        phone: ''
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -91,6 +92,25 @@ const Register = ({ onToggle }) => {
                                 name="email"
                                 type="email"
                                 value={formData.email}
+                                onChange={handleChange}
+                                style={{
+                                    width: '100%', padding: '12px 12px 12px 40px', background: 'rgba(15, 23, 42, 0.6)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: 'white'
+                                }}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>Mobile Number (SMS Alerts)</label>
+                        <div style={{ position: 'relative' }}>
+                            <Phone size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                            <input
+                                name="phone"
+                                type="tel"
+                                placeholder="e.g. 9876543210"
+                                value={formData.phone}
                                 onChange={handleChange}
                                 style={{
                                     width: '100%', padding: '12px 12px 12px 40px', background: 'rgba(15, 23, 42, 0.6)',

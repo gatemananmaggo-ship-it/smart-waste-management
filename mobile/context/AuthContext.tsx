@@ -11,6 +11,7 @@ interface User {
   city?: string;
   state?: string;
   place?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -19,6 +20,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updatedUser: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,8 +76,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = async (updatedUser: Partial<User>) => {
+    try {
+      const newUser = { ...user, ...updatedUser } as User;
+      await AsyncStorage.setItem('userData', JSON.stringify(newUser));
+      setUser(newUser);
+    } catch (e) {
+      console.error('Failed to update user data', e);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

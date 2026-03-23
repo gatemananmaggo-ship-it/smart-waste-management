@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { User, Lock, Mail, Globe, MapPin } from 'lucide-react-native';
+import { User, Lock, Mail, Globe, MapPin, Phone } from 'lucide-react-native';
 import { useAuth, API_BASE_URL } from '../../context/AuthContext';
 import axios from 'axios';
 
@@ -10,15 +10,16 @@ export default function RegisterScreen() {
     username: '',
     email: '',
     password: '',
-    area_access: 'Worker'
+    area_access: 'Worker',
+    phone: ''
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async () => {
-    const { username, email, password } = formData;
-    if (!username || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+    const { username, email, password, phone } = formData;
+    if (!username || !email || !password || !phone) {
+      Alert.alert('Error', 'Please fill in all fields including Mobile Number');
       return;
     }
 
@@ -57,6 +58,18 @@ export default function RegisterScreen() {
               placeholderTextColor="#94a3b8"
               value={formData.username}
               onChangeText={(text) => setFormData({...formData, username: text})}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Phone size={20} color="#94a3b8" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Mobile Number (e.g. 9876543210)"
+              placeholderTextColor="#94a3b8"
+              value={formData.phone}
+              onChangeText={(text) => setFormData({...formData, phone: text})}
+              keyboardType="phone-pad"
             />
           </View>
 

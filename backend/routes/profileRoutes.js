@@ -38,4 +38,33 @@ router.put('/change-password', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/profile/update-phone
+// @desc    Update user phone number
+// @access  Private
+router.put('/update-phone', auth, async (req, res) => {
+    try {
+        const { phone } = req.body;
+
+        if (!phone) {
+            return res.status(400).json({ message: 'Please provide a phone number' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.phone = phone;
+        await user.save();
+
+        res.json({ 
+            message: 'Phone number updated successfully',
+            phone: user.phone
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error during phone update' });
+    }
+});
+
 module.exports = router;

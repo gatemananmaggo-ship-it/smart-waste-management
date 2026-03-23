@@ -5,6 +5,7 @@ const BinHistory = require('../models/BinHistory');
 const History = require('../models/History'); // New Hub-wide history
 const User = require('../models/User');
 const auth = require('../middleware/authMiddleware');
+const smsService = require('../utils/smsService');
 
 // GET all bins for the logged-in user
 router.get('/', auth, async (req, res) => {
@@ -135,6 +136,16 @@ router.patch('/:hardwareId', async (req, res) => {
                     timestamp: hubHistory.timestamp,
                     fillLevel: hubHistory.averageFillLevel
                 });
+            }
+        }
+
+        // Trigger SMS alert if fill level is high
+        if (fillLevel >= 90) {
+            const ownerUser = await User.findById(bin.owner);
+            if (ownerUser && ownerUser.phone) {
+                console.log(`Triggering SMS alert for bin ${bin.hardwareId} at ${fillLevel}%`);
+                smsService.sendFullBinAlert(ownerUser.phone, bin.hardwareId, bin.address)
+                    .catch(err => console.error('Failed to send SMS:', err.message));
             }
         }
 

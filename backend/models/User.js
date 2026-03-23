@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    phone: {
+        type: String,
+        required: true,
+        trim: true,
+        description: "Indian mobile number (10 digits)"
+    },
     createdAt: {
         type: Date,
         default: Date.now

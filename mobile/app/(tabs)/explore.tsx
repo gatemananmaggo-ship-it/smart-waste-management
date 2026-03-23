@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity, Modal } from 'react-native';
 import axios from 'axios';
 import CONFIG from '../../constants/Config';
-import { Trash2, AlertTriangle, CheckCircle, Scan, Navigation, LogOut, User } from 'lucide-react-native';
+import { Trash2, AlertTriangle, CheckCircle, Scan, Navigation, LogOut, User, Phone } from 'lucide-react-native';
 import { Linking, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useHub } from '../../context/HubContext';
@@ -26,8 +26,11 @@ export default function ListViewScreen() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { hubId, setHubId } = useHub();
-  const { user, logout } = useAuth();
+  const { user, logout, token, updateUser } = useAuth();
   const [tempHubId, setTempHubId] = useState('');
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [newPhone, setNewPhone] = useState(user?.phone || '');
+  const [isUpdatingPhone, setIsUpdatingPhone] = useState(false);
 
   const fetchBins = async () => {
     if (!hubId) {
@@ -90,6 +93,28 @@ export default function ListViewScreen() {
 
     if (url) {
         Linking.openURL(url);
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    if (!newPhone || newPhone.length < 10) {
+      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
+      return;
+    }
+    setIsUpdatingPhone(true);
+    try {
+      await axios.put(`${CONFIG.API_BASE_URL}/profile/update-phone`, 
+        { phone: newPhone },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await updateUser({ phone: newPhone });
+      setShowPhoneModal(false);
+      Alert.alert("Success", "Phone number updated successfully!");
+    } catch (err: any) {
+      console.error("Error updating phone:", err);
+      Alert.alert("Error", err.response?.data?.message || "Failed to update phone number.");
+    } finally {
+      setIsUpdatingPhone(false);
     }
   };
 
@@ -174,9 +199,14 @@ export default function ListViewScreen() {
             <User size={14} color="#38bdf8" />
             <Text style={styles.userNameText}>{user?.username}</Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <LogOut size={18} color="#ef4444" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity onPress={() => setShowPhoneModal(true)} style={styles.phoneButton}>
+              <Phone size={18} color="#38bdf8" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <LogOut size={18} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerTitle}>Bin Status</Text>
         {hubId ? (
@@ -242,6 +272,54 @@ export default function ListViewScreen() {
           </TouchableOpacity>
         </>
       )}
+
+      {/* Phone Update Modal */}
+      <Modal
+        visible={showPhoneModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPhoneModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Phone Number</Text>
+            <Text style={styles.modalSub}>Receive SMS alerts when bins are full</Text>
+            
+            <View style={styles.modalInputContainer}>
+              <Phone size={20} color="#94a3b8" style={{ marginRight: 12 }} />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="9876543210"
+                placeholderTextColor="#94a3b8"
+                value={newPhone}
+                onChangeText={setNewPhone}
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.cancelButton} 
+                onPress={() => setShowPhoneModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                onPress={handleUpdatePhone}
+                disabled={isUpdatingPhone}
+              >
+                {isUpdatingPhone ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -306,6 +384,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#fee2e2',
+  },
+  phoneButton: {
+    padding: 8,
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
   },
   hubInfoRow: {
     flexDirection: 'row',
@@ -518,5 +603,73 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: '85%',
+    padding: 24,
+    borderRadius: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  modalSub: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 20,
+  },
+  modalInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
+    marginBottom: 24,
+  },
+  modalInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#0f172a',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+  },
+  cancelButtonText: {
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  saveButton: {
+    flex: 2,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#38bdf8',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: '700',
   }
 });

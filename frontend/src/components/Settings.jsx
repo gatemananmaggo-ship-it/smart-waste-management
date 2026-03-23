@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { User, Mail, Shield, Palette, Languages, Lock, CheckCircle2, AlertCircle, Eye, EyeOff, Globe } from 'lucide-react';
+import { User, Mail, Shield, Palette, Languages, Lock, CheckCircle2, AlertCircle, Eye, EyeOff, Globe, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import CONFIG from '../config';
 
 const Settings = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const { language, t, changeLanguage } = useLanguage();
     
     // Password state
@@ -14,6 +14,10 @@ const Settings = () => {
     const [showPasswords, setShowPasswords] = useState(false);
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isUpdating, setIsUpdating] = useState(false);
+
+    // Phone state
+    const [newPhone, setNewPhone] = useState(user?.phone || '');
+    const [isUpdatingPhone, setIsUpdatingPhone] = useState(false);
 
     // Theme state (local for now, could be in Context)
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -46,6 +50,25 @@ const Settings = () => {
             setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update password' });
         } finally {
             setIsUpdating(false);
+        }
+    };
+
+    const handlePhoneUpdate = async (e) => {
+        e.preventDefault();
+        setStatus({ type: '', message: '' });
+        setIsUpdatingPhone(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`${CONFIG.API_URL}/profile/update-phone`, 
+                { phone: newPhone },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            updateUser({ phone: res.data.phone });
+            setStatus({ type: 'success', message: 'Phone number updated successfully!' });
+        } catch (err) {
+            setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update phone' });
+        } finally {
+            setIsUpdatingPhone(false);
         }
     };
 
@@ -112,6 +135,41 @@ const Settings = () => {
                             <span>{user?.city}, {user?.state}</span>
                         </div>
                     </div>
+                </div>
+
+                <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
+                    <form onSubmit={handlePhoneUpdate} style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={labelStyle}>Mobile Number (SMS Alerts)</label>
+                            <div style={{ position: 'relative' }}>
+                                <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                                <input
+                                    type="tel"
+                                    style={{ ...inputStyle, paddingLeft: '40px' }}
+                                    value={newPhone}
+                                    onChange={(e) => setNewPhone(e.target.value)}
+                                    placeholder="e.g. 9876543210"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <button 
+                            type="submit"
+                            disabled={isUpdatingPhone}
+                            style={{
+                                padding: '12px 24px',
+                                background: 'linear-gradient(135deg, #38bdf8, #6366f1)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                color: 'white',
+                                fontWeight: 600,
+                                cursor: isUpdatingPhone ? 'not-allowed' : 'pointer',
+                                opacity: isUpdatingPhone ? 0.7 : 1
+                            }}
+                        >
+                            {isUpdatingPhone ? 'Saving...' : 'Update Phone'}
+                        </button>
+                    </form>
                 </div>
             </div>
 
