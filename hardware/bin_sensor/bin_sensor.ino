@@ -13,8 +13,9 @@ const char* password = "up80gd0383";
 // The unique ID for this specific bin (must match the one registered in the web UI)
 const char* hardwareId = "BIN-001";
 
-// Server base URL (e.g. http://192.168.1.3:5000)
-const char* serverBaseUrl = "http://192.168.1.3:5000";
+// Server base URL
+const char* serverBaseUrl = "https://smart-waste-api-epmw.onrender.com"; // Live Render server
+// const char* serverBaseUrl = "http://192.168.1.6:5000"; // Local Machine
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY
