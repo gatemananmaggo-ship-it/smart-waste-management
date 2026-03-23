@@ -40,3 +40,8 @@ node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-ep
 for bin-003 to be filled up to 75%
 
 node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-epmw.onrender.com/api/bins/BIN-003', { fillLevel: 75, status: 'Filling' }).then(r => console.log('Successfully updated BIN-003')).catch(e => { if (e.response && e.response.status === 404) { axios.post('https://smart-waste-api-epmw.onrender.com/api/bins', { hardwareId: 'BIN-003', address: 'AKGEC Campus', location: { latitude: 28.6757, longitude: 77.5020 }, fillLevel: 75, status: 'Filling' }).then(r => console.log('Successfully created BIN-003')).catch(e2 => console.error('Failed:', e2.message)); } else { console.error('Failed:', e.message); } })"
+
+
+sms api key
+
+eRAyfMpgPlciS6m0VxjOoZE75BKuUdIWJnr8t2kNGhQ1Cv43FadlJBeOKsT2qhNQy6LDnz9Z4XavRHWY
