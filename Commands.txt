@@ -26,6 +26,11 @@ MananSinghMaggo
 
 mongodb+srv://MananSinghMaggo:7LszMiqVzJ_WtY@cluster0.lp0ncvh.mongodb.net/?appName=Cluster0
 
+PORT=5000
+MONGODB_URI=mongodb+srv://MananSinghMaggo:7LszMiqVzJ_WtY@cluster0.lp0ncvh.mongodb.net/?appName=Cluster0
+JWT_SECRET=AnyRandomStringForSecurity
+
+
 node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-epmw.onrender.com/api/bins/BIN-001', { fillLevel: 90, status: 'Full' }).then(r => console.log('Successfully updated BIN-001')).catch(e => { if (e.response && e.response.status === 404) { axios.post('https://smart-waste-api-epmw.onrender.com/api/bins', { hardwareId: 'BIN-001', address: 'AKGEC Campus', location: { latitude: 28.6757, longitude: 77.5020 }, fillLevel: 90, status: 'Full' }).then(r => console.log('Successfully created BIN-001')).catch(e2 => console.error('Failed:', e2.message)); } else { console.error('Failed:', e.message); } })"
 
 for bin-005
