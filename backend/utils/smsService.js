@@ -17,6 +17,9 @@ const sendFullBinAlert = async (phone, binId, area) => {
     const message = `Alert: Bin ${binId} is 90% full. Location: ${area}. Please empty it. - EcoSmart`;
 
     console.log(`[SMS SERVICE] Sending to ${phone}: ${message}`);
+    const maskedKey = SMS_CONFIG.API_KEY ? `${SMS_CONFIG.API_KEY.substring(0, 4)}...${SMS_CONFIG.API_KEY.slice(-4)}` : 'MISSING';
+    console.log(`[SMS SERVICE] Using API Key: ${maskedKey}`);
+
 
     if (SMS_CONFIG.PROVIDER === 'MOCK') {
         console.log('[SMS SERVICE] MOCK mode: Alert would be sent here.');
