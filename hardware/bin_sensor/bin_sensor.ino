@@ -8,14 +8,16 @@
  */
 
 // --- CONFIGURATION ---
-const char *ssid = "Wi-fi Name";
-const char *password = "Wi-fi Password";
+const char *ssid = "Manan's iphone 16";
+const char *password = "mnbvcxza";
 
-// The unique ID for this specific bin (must match the one registered in the web UI)
+// The unique ID for this specific bin (must match the one registered in the web
+// UI)
 const char *hardwareId = "BIN-001";
 
 // Server base URL
-const char *serverBaseUrl = "https://smart-waste-api-epmw.onrender.com"; // Live Render server
+const char *serverBaseUrl =
+    "https://smart-waste-api-epmw.onrender.com"; // Live Render server
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY
@@ -85,7 +87,7 @@ void loop() {
     WiFiClient client;
     HTTPClient http;
     String fullUrl = String(serverBaseUrl) + "/api/bins/" + String(hardwareId);
-    
+
     // Begin request
     http.begin(client, fullUrl);
     http.addHeader("Content-Type", "application/json");
