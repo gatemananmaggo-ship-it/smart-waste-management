@@ -1,6 +1,6 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 
 /**
  * EcoSmart bin_sensor.ino (NodeMCU Version)
@@ -8,8 +8,8 @@
  */
 
 // --- CONFIGURATION ---
-const char *ssid = "Manan's iphone 16";
-const char *password = "mnbvcxza";
+const char *ssid = "Airtel_Raptor 5g";
+const char *password = "up80gd0383";
 
 // The unique ID for this specific bin (must match the one registered in the web
 // UI)
@@ -84,7 +84,8 @@ void loop() {
 
   // 3. Send to Cloud (if WiFi is connected)
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient client;
+    WiFiClientSecure client;
+    client.setInsecure(); // Disable SSL certificate verification for NodeMCU
     HTTPClient http;
     String fullUrl = String(serverBaseUrl) + "/api/bins/" + String(hardwareId);
 
