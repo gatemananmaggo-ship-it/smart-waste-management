@@ -8,7 +8,6 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const binRoutes = require('./routes/binRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const workerRoutes = require('./routes/workerRoutes');
 const Bin = require('./models/Bin');
 
 const app = express();
@@ -30,7 +29,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/bins', binRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/workers', workerRoutes);
 
 // Root Route
 app.get('/', (req, res) => {

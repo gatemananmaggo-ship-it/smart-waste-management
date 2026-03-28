@@ -111,9 +111,7 @@ router.post('/login', async (req, res) => {
                 place: user.place,
                 hubId: user.hubId,
                 phone: user.phone,
-                isAvailable: user.isAvailable,
-                role: user.role || 'admin',
-                linkedHubId: user.linkedHubId || null
+                isAvailable: user.isAvailable
             }
         });
     } catch (err) {
