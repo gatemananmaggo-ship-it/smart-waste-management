@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity, Modal, Switch } from 'react-native';
 import axios from 'axios';
 import CONFIG from '../../constants/Config';
 import { Trash2, AlertTriangle, CheckCircle, Scan, Navigation, LogOut, User, Phone } from 'lucide-react-native';
@@ -31,6 +31,8 @@ export default function ListViewScreen() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState(user?.phone || '');
   const [isUpdatingPhone, setIsUpdatingPhone] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(user?.isAvailable !== false);
+  const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
 
   const fetchBins = async () => {
     if (!hubId) {
@@ -118,6 +120,25 @@ export default function ListViewScreen() {
     }
   };
 
+  const handleToggleAvailability = async (value: boolean) => {
+    setIsUpdatingAvailability(true);
+    try {
+      await axios.put(`${CONFIG.API_BASE_URL}/profile/update-availability`, 
+        { isAvailable: value },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsAvailable(value);
+      await updateUser({ isAvailable: value });
+      Alert.alert("Success", `SMS Alerts ${value ? 'enabled' : 'disabled'} successfully!`);
+    } catch (err: any) {
+      console.error("Error updating availability:", err);
+      Alert.alert("Error", err.response?.data?.message || "Failed to update availability.");
+      setIsAvailable(!value); // Revert state on error
+    } finally {
+      setIsUpdatingAvailability(false);
+    }
+  };
+
   const onRefresh = () => {
     if (!hubId) {
       setRefreshing(false);
@@ -199,7 +220,18 @@ export default function ListViewScreen() {
             <User size={14} color="#38bdf8" />
             <Text style={styles.userNameText}>{user?.username}</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f9ff', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20, borderWidth: 1, borderColor: '#e0f2fe' }}>
+              <Text style={{ fontSize: 10, color: '#0369a1', marginRight: 4, fontWeight: '600' }}>SMS</Text>
+              <Switch
+                value={isAvailable}
+                onValueChange={handleToggleAvailability}
+                disabled={isUpdatingAvailability}
+                style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                trackColor={{ false: '#cbd5e1', true: '#34d399' }}
+                thumbColor={isAvailable ? '#fff' : '#fff'}
+              />
+            </View>
             <TouchableOpacity onPress={() => setShowPhoneModal(true)} style={styles.phoneButton}>
               <Phone size={18} color="#38bdf8" />
             </TouchableOpacity>

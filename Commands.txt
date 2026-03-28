@@ -45,3 +45,7 @@ node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-ep
 sms api key
 
 eRAyfMpgPlciS6m0VxjOoZE75BKuUdIWJnr8t2kNGhQ1Cv43FadlJBeOKsT2qhNQy6LDnz9Z4XavRHWY
+
+
+$env:NODE_OPTIONS = "--dns-result-order=ipv4first"
+npx expo start

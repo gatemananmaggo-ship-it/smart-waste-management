@@ -10,7 +10,7 @@ const axios = require('axios');
 const SMS_CONFIG = {
     ENABLED: true,
     API_KEY: process.env.SMS_API_KEY || 'YOUR_FAST2SMS_KEY',
-    PROVIDER: 'FAST2SMS', // 'FAST2SMS' or 'TWILIO' or 'MOCK'
+    PROVIDER: 'MOCK', // 'FAST2SMS' or 'TWILIO' or 'MOCK'
 };
 
 const sendFullBinAlert = async (phone, binId, area) => {

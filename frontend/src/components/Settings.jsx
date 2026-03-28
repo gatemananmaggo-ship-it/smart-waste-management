@@ -15,9 +15,12 @@ const Settings = () => {
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // Phone state
     const [newPhone, setNewPhone] = useState(user?.phone || '');
     const [isUpdatingPhone, setIsUpdatingPhone] = useState(false);
+
+    // Availability state
+    const [isAvailable, setIsAvailable] = useState(user?.isAvailable !== false);
+    const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
 
     // Theme state (local for now, could be in Context)
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -68,7 +71,28 @@ const Settings = () => {
         } catch (err) {
             setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update phone' });
         } finally {
+        } finally {
             setIsUpdatingPhone(false);
+        }
+    };
+
+    const handleAvailabilityToggle = async () => {
+        setIsUpdatingAvailability(true);
+        setStatus({ type: '', message: '' });
+        try {
+            const token = localStorage.getItem('token');
+            const newAvailability = !isAvailable;
+            await axios.put(`${CONFIG.API_URL}/profile/update-availability`, 
+                { isAvailable: newAvailability },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setIsAvailable(newAvailability);
+            updateUser({ isAvailable: newAvailability });
+            setStatus({ type: 'success', message: 'Availability updated successfully!' });
+        } catch (err) {
+            setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update availability' });
+        } finally {
+            setIsUpdatingAvailability(false);
         }
     };
 
@@ -169,7 +193,43 @@ const Settings = () => {
                         >
                             {isUpdatingPhone ? 'Saving...' : 'Update Phone'}
                         </button>
+                        </button>
                     </form>
+                </div>
+                
+                <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <span style={{ display: 'block', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>SMS Alerts Availability</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Toggle to {isAvailable ? 'disable' : 'enable'} receiving full bin SMS notifications</span>
+                        </div>
+                        <button
+                            onClick={handleAvailabilityToggle}
+                            disabled={isUpdatingAvailability}
+                            style={{
+                                position: 'relative',
+                                width: '50px',
+                                height: '26px',
+                                background: isAvailable ? '#10b981' : 'rgba(255, 255, 255, 0.2)',
+                                borderRadius: '30px',
+                                border: 'none',
+                                cursor: isUpdatingAvailability ? 'not-allowed' : 'pointer',
+                                transition: 'background 0.3s',
+                                opacity: isUpdatingAvailability ? 0.7 : 1
+                            }}
+                        >
+                            <div style={{
+                                position: 'absolute',
+                                top: '3px',
+                                left: isAvailable ? '27px' : '3px',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: 'white',
+                                transition: 'left 0.3s'
+                            }} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
