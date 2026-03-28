@@ -101,7 +101,7 @@ router.patch('/:hardwareId', async (req, res) => {
                 status,
                 lastUpdated: Date.now()
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!bin) return res.status(404).json({ message: 'Bin not found' });
