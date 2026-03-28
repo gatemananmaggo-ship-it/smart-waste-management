@@ -8,7 +8,7 @@ import CONFIG from '../config';
 const Settings = () => {
     const { user, updateUser } = useAuth();
     const { language, t, changeLanguage } = useLanguage();
-    
+
     // Password state
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [showPasswords, setShowPasswords] = useState(false);
@@ -43,7 +43,7 @@ const Settings = () => {
         setIsUpdating(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${CONFIG.API_URL}/profile/change-password`, 
+            await axios.put(`${CONFIG.API_URL}/profile/change-password`,
                 { currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -62,7 +62,7 @@ const Settings = () => {
         setIsUpdatingPhone(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put(`${CONFIG.API_URL}/profile/update-phone`, 
+            const res = await axios.put(`${CONFIG.API_URL}/profile/update-phone`,
                 { phone: newPhone },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -70,7 +70,6 @@ const Settings = () => {
             setStatus({ type: 'success', message: 'Phone number updated successfully!' });
         } catch (err) {
             setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update phone' });
-        } finally {
         } finally {
             setIsUpdatingPhone(false);
         }
@@ -82,7 +81,7 @@ const Settings = () => {
         try {
             const token = localStorage.getItem('token');
             const newAvailability = !isAvailable;
-            await axios.put(`${CONFIG.API_URL}/profile/update-availability`, 
+            await axios.put(`${CONFIG.API_URL}/profile/update-availability`,
                 { isAvailable: newAvailability },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -129,7 +128,7 @@ const Settings = () => {
                     <User color="var(--accent-primary)" size={24} />
                     <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('account_info')}</h3>
                 </div>
-                
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div>
                         <span style={labelStyle}>{t('username')}</span>
@@ -177,7 +176,7 @@ const Settings = () => {
                                 />
                             </div>
                         </div>
-                        <button 
+                        <button
                             type="submit"
                             disabled={isUpdatingPhone}
                             style={{
@@ -193,194 +192,193 @@ const Settings = () => {
                         >
                             {isUpdatingPhone ? 'Saving...' : 'Update Phone'}
                         </button>
-                        </button>
                     </form>
-                </div>
-                
-                <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <span style={{ display: 'block', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>SMS Alerts Availability</span>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Toggle to {isAvailable ? 'disable' : 'enable'} receiving full bin SMS notifications</span>
-                        </div>
-                        <button
-                            onClick={handleAvailabilityToggle}
-                            disabled={isUpdatingAvailability}
-                            style={{
-                                position: 'relative',
-                                width: '50px',
-                                height: '26px',
-                                background: isAvailable ? '#10b981' : 'rgba(255, 255, 255, 0.2)',
-                                borderRadius: '30px',
-                                border: 'none',
-                                cursor: isUpdatingAvailability ? 'not-allowed' : 'pointer',
-                                transition: 'background 0.3s',
-                                opacity: isUpdatingAvailability ? 0.7 : 1
-                            }}
-                        >
-                            <div style={{
-                                position: 'absolute',
-                                top: '3px',
-                                left: isAvailable ? '27px' : '3px',
-                                width: '20px',
-                                height: '20px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                transition: 'left 0.3s'
-                            }} />
-                        </button>
-                    </div>
-                </div>
             </div>
 
-            {/* Appearance & Language */}
-            <div style={sectionStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                    <Palette color="var(--accent-primary)" size={24} />
-                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('appearance')}</h3>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', marginBottom: '20px' }}>
+            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <p style={{ margin: 0, fontWeight: 600 }}>{t('theme')}</p>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Toggle between {theme === 'dark' ? 'light' : 'dark'} mode</p>
+                        <span style={{ display: 'block', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>SMS Alerts Availability</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Toggle to {isAvailable ? 'disable' : 'enable'} receiving full bin SMS notifications</span>
                     </div>
-                    <button 
-                        onClick={handleThemeToggle}
+                    <button
+                        onClick={handleAvailabilityToggle}
+                        disabled={isUpdatingAvailability}
                         style={{
-                            padding: '8px 20px',
-                            background: theme === 'dark' ? '#38bdf8' : '#6366f1',
-                            border: 'none',
+                            position: 'relative',
+                            width: '50px',
+                            height: '26px',
+                            background: isAvailable ? '#10b981' : 'rgba(255, 255, 255, 0.2)',
                             borderRadius: '30px',
-                            color: 'white',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {theme === 'dark' ? t('light') : t('dark')}
-                    </button>
-                </div>
-
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                        <Languages size={18} color="var(--text-secondary)" />
-                        <span style={{ fontWeight: 600 }}>{t('language')}</span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-                        {[
-                            { code: 'en', name: 'English' },
-                            { code: 'hi', name: 'हिन्दी' },
-                            { code: 'bn', name: 'বাংলা' },
-                            { code: 'mr', name: 'मराठी' },
-                            { code: 'te', name: 'తెలుగు' },
-                            { code: 'ta', name: 'தமிழ்' }
-                        ].map((lang) => (
-                            <button
-                                key={lang.code}
-                                onClick={() => changeLanguage(lang.code)}
-                                style={{
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    border: '1px solid',
-                                    borderColor: language === lang.code ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
-                                    background: language === lang.code ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255,255,255,0.02)',
-                                    color: language === lang.code ? 'white' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    fontSize: '0.9rem'
-                                }}
-                            >
-                                {lang.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Security */}
-            <div style={sectionStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                    <Shield color="#ef4444" size={24} />
-                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('security')}</h3>
-                </div>
-
-                <form onSubmit={handlePasswordChange}>
-                    <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>{t('current_password')}</label>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type={showPasswords ? 'text' : 'password'}
-                                style={inputStyle}
-                                value={passwordData.currentPassword}
-                                onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                                required
-                            />
-                            <button 
-                                type="button"
-                                onClick={() => setShowPasswords(!showPasswords)}
-                                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                            >
-                                {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-                        <div>
-                            <label style={labelStyle}>{t('new_password')}</label>
-                            <input
-                                type={showPasswords ? 'text' : 'password'}
-                                style={inputStyle}
-                                value={passwordData.newPassword}
-                                onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label style={labelStyle}>{t('confirm_password')}</label>
-                            <input
-                                type={showPasswords ? 'text' : 'password'}
-                                style={inputStyle}
-                                value={passwordData.confirmPassword}
-                                onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {status.message && (
-                        <div style={{ 
-                            display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', 
-                            borderRadius: '8px', marginBottom: '20px',
-                            background: status.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            color: status.type === 'success' ? '#10b981' : '#ef4444',
-                            border: `1px solid ${status.type === 'success' ? '#10b981' : '#ef4444'}`
-                        }}>
-                            {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-                            <span style={{ fontSize: '0.9rem' }}>{status.message}</span>
-                        </div>
-                    )}
-
-                    <button 
-                        type="submit"
-                        disabled={isUpdating}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            background: 'var(--accent-primary)',
                             border: 'none',
-                            borderRadius: '8px',
-                            color: 'white',
-                            fontWeight: 700,
-                            cursor: isUpdating ? 'not-allowed' : 'pointer',
-                            opacity: isUpdating ? 0.7 : 1
+                            cursor: isUpdatingAvailability ? 'not-allowed' : 'pointer',
+                            transition: 'background 0.3s',
+                            opacity: isUpdatingAvailability ? 0.7 : 1
                         }}
                     >
-                        {isUpdating ? 'Updating...' : t('update_password')}
+                        <div style={{
+                            position: 'absolute',
+                            top: '3px',
+                            left: isAvailable ? '27px' : '3px',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            background: 'white',
+                            transition: 'left 0.3s'
+                        }} />
                     </button>
-                </form>
+                </div>
             </div>
         </div>
+
+            {/* Appearance & Language */ }
+    <div style={sectionStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <Palette color="var(--accent-primary)" size={24} />
+            <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('appearance')}</h3>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', marginBottom: '20px' }}>
+            <div>
+                <p style={{ margin: 0, fontWeight: 600 }}>{t('theme')}</p>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Toggle between {theme === 'dark' ? 'light' : 'dark'} mode</p>
+            </div>
+            <button
+                onClick={handleThemeToggle}
+                style={{
+                    padding: '8px 20px',
+                    background: theme === 'dark' ? '#38bdf8' : '#6366f1',
+                    border: 'none',
+                    borderRadius: '30px',
+                    color: 'white',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                }}
+            >
+                {theme === 'dark' ? t('light') : t('dark')}
+            </button>
+        </div>
+
+        <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <Languages size={18} color="var(--text-secondary)" />
+                <span style={{ fontWeight: 600 }}>{t('language')}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                {[
+                    { code: 'en', name: 'English' },
+                    { code: 'hi', name: 'हिन्दी' },
+                    { code: 'bn', name: 'বাংলা' },
+                    { code: 'mr', name: 'मराठी' },
+                    { code: 'te', name: 'తెలుగు' },
+                    { code: 'ta', name: 'தமிழ்' }
+                ].map((lang) => (
+                    <button
+                        key={lang.code}
+                        onClick={() => changeLanguage(lang.code)}
+                        style={{
+                            padding: '10px',
+                            borderRadius: '8px',
+                            border: '1px solid',
+                            borderColor: language === lang.code ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                            background: language === lang.code ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255,255,255,0.02)',
+                            color: language === lang.code ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        {lang.name}
+                    </button>
+                ))}
+            </div>
+        </div>
+    </div>
+
+    {/* Security */ }
+    <div style={sectionStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <Shield color="#ef4444" size={24} />
+            <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('security')}</h3>
+        </div>
+
+        <form onSubmit={handlePasswordChange}>
+            <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>{t('current_password')}</label>
+                <div style={{ position: 'relative' }}>
+                    <input
+                        type={showPasswords ? 'text' : 'password'}
+                        style={inputStyle}
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPasswords(!showPasswords)}
+                        style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                        {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                <div>
+                    <label style={labelStyle}>{t('new_password')}</label>
+                    <input
+                        type={showPasswords ? 'text' : 'password'}
+                        style={inputStyle}
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        required
+                    />
+                </div>
+                <div>
+                    <label style={labelStyle}>{t('confirm_password')}</label>
+                    <input
+                        type={showPasswords ? 'text' : 'password'}
+                        style={inputStyle}
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        required
+                    />
+                </div>
+            </div>
+
+            {status.message && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '12px',
+                    borderRadius: '8px', marginBottom: '20px',
+                    background: status.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    color: status.type === 'success' ? '#10b981' : '#ef4444',
+                    border: `1px solid ${status.type === 'success' ? '#10b981' : '#ef4444'}`
+                }}>
+                    {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                    <span style={{ fontSize: '0.9rem' }}>{status.message}</span>
+                </div>
+            )}
+
+            <button
+                type="submit"
+                disabled={isUpdating}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'var(--accent-primary)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontWeight: 700,
+                    cursor: isUpdating ? 'not-allowed' : 'pointer',
+                    opacity: isUpdating ? 0.7 : 1
+                }}
+            >
+                {isUpdating ? 'Updating...' : t('update_password')}
+            </button>
+        </form>
+    </div>
+        </div >
     );
 };
 
