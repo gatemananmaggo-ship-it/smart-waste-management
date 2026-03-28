@@ -150,14 +150,25 @@ router.patch('/:hardwareId', async (req, res) => {
                     phone: { $exists: true, $ne: '' }
                 });
 
-                if (linkedWorkers.length > 0) {
-                    console.log(`Triggering SMS for bin ${bin.hardwareId} at ${fillLevel}% to ${linkedWorkers.length} worker(s)`);
-                    linkedWorkers.forEach(worker => {
-                        smsService.sendFullBinAlert(worker.phone, bin.hardwareId, bin.address)
-                            .catch(err => console.error(`Failed to send SMS to ${worker.phone}:`, err.message));
+                // Build recipient list (Admin + Workers)
+                const recipients = [];
+                if (ownerUser.phone) {
+                    recipients.push({ name: 'Admin', phone: ownerUser.phone });
+                }
+                
+                linkedWorkers.forEach(worker => {
+                    recipients.push({ name: worker.username, phone: worker.phone });
+                });
+
+                if (recipients.length > 0) {
+                    console.log(`[SMS] Triggering alerts for bin ${bin.hardwareId} (${fillLevel}%) to ${recipients.length} recipient(s)`);
+                    recipients.forEach(recipient => {
+                        smsService.sendFullBinAlert(recipient.phone, bin.hardwareId, bin.address)
+                            .then(() => console.log(`[SMS] Success: Sent to ${recipient.name} at ${recipient.phone}`))
+                            .catch(err => console.error(`[SMS] Failed: Could not send to ${recipient.name}:`, err.message));
                     });
                 } else {
-                    console.log(`No available linked workers found for hub ${ownerUser.hubId} — no SMS sent`);
+                    console.log(`[SMS] No recipients (admin or available workers) found for hub ${ownerUser.hubId}`);
                 }
             }
         }

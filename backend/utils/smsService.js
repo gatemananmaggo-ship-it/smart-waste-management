@@ -27,12 +27,13 @@ const sendFullBinAlert = async (phone, binId, area) => {
     }
 
     if (SMS_CONFIG.PROVIDER === 'FAST2SMS') {
-        if (!process.env.SMS_API_KEY) {
+        const apiKeySet = !!process.env.SMS_API_KEY;
+        if (!apiKeySet) {
             console.error('[SMS SERVICE] ERROR: SMS_API_KEY is not set in environment variables!');
             return { success: false, message: 'API Key missing' };
         }
         try {
-            // Example for Fast2SMS (Indian Provider)
+            console.log(`[SMS SERVICE] Dispatching to Fast2SMS for ${phone}...`);
             const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
                 route: 'q',
                 message: message,
@@ -44,11 +45,17 @@ const sendFullBinAlert = async (phone, binId, area) => {
                     "authorization": SMS_CONFIG.API_KEY
                 }
             });
+
+            if (response.data && response.data.return) {
+                console.log(`[SMS SERVICE] Success: Message sent to ${phone}. Request ID: ${response.data.request_id}`);
+            } else {
+                console.warn(`[SMS SERVICE] Provider Warning: ${JSON.stringify(response.data)}`);
+            }
             return response.data;
         } catch (error) {
             const errorDetail = error.response?.data || error.message;
-            console.error('[SMS SERVICE] Fast2SMS Error:', errorDetail);
-            throw new Error(`Fast2SMS Failed: ${JSON.stringify(errorDetail)}`);
+            console.error(`[SMS SERVICE] API Failure for ${phone}:`, errorDetail);
+            throw new Error(`Fast2SMS Failed for ${phone}: ${JSON.stringify(errorDetail)}`);
         }
     }
 
