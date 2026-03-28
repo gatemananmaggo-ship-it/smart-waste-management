@@ -1,6 +1,17 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+    role: {
+        type: String,
+        enum: ['admin', 'worker'],
+        default: 'admin'
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+        description: "Admin who created this worker account"
+    },
     username: {
         type: String,
         required: true,
