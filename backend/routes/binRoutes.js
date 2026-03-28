@@ -142,10 +142,12 @@ router.patch('/:hardwareId', async (req, res) => {
         // Trigger SMS alert if fill level is high
         if (fillLevel >= 90) {
             const ownerUser = await User.findById(bin.owner);
-            if (ownerUser && ownerUser.phone) {
+            if (ownerUser && ownerUser.phone && ownerUser.isAvailable !== false) {
                 console.log(`Triggering SMS alert for bin ${bin.hardwareId} at ${fillLevel}%`);
                 smsService.sendFullBinAlert(ownerUser.phone, bin.hardwareId, bin.address)
                     .catch(err => console.error('Failed to send SMS:', err.message));
+            } else if (ownerUser && ownerUser.isAvailable === false) {
+                console.log(`Skipping SMS alert for bin ${bin.hardwareId} - Worker marked as unavailable`);
             }
         }
 

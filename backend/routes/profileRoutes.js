@@ -67,4 +67,33 @@ router.put('/update-phone', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/profile/update-availability
+// @desc    Update worker availability for SMS notifications
+// @access  Private
+router.put('/update-availability', auth, async (req, res) => {
+    try {
+        const { isAvailable } = req.body;
+
+        if (isAvailable === undefined) {
+            return res.status(400).json({ message: 'Please provide availability status' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.isAvailable = isAvailable;
+        await user.save();
+
+        res.json({ 
+            message: 'Availability updated successfully',
+            isAvailable: user.isAvailable
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error during availability update' });
+    }
+});
+
 module.exports = router;

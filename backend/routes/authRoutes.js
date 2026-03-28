@@ -64,7 +64,9 @@ router.post('/register', async (req, res) => {
             user: {
                 id: newUser._id,
                 username: newUser.username,
-                hubId: newUser.hubId
+                hubId: newUser.hubId,
+                phone: newUser.phone,
+                isAvailable: newUser.isAvailable
             }
         });
     } catch (err) {
@@ -107,7 +109,9 @@ router.post('/login', async (req, res) => {
                 state: user.state,
                 city: user.city,
                 place: user.place,
-                hubId: user.hubId
+                hubId: user.hubId,
+                phone: user.phone,
+                isAvailable: user.isAvailable
             }
         });
     } catch (err) {

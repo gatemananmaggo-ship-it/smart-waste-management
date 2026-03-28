@@ -47,6 +47,11 @@ const userSchema = new mongoose.Schema({
         trim: true,
         description: "Indian mobile number (10 digits)"
     },
+    isAvailable: {
+        type: Boolean,
+        default: true,
+        description: "Controls whether the worker receives SMS alerts for full bins"
+    },
     createdAt: {
         type: Date,
         default: Date.now
