@@ -12,6 +12,8 @@ interface User {
   state?: string;
   place?: string;
   phone?: string;
+  isAvailable?: boolean;
+  linkedHubId?: string | null;
 }
 
 interface AuthContextType {

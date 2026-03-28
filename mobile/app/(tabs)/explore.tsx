@@ -60,9 +60,28 @@ export default function ListViewScreen() {
     return () => clearInterval(intervalId);
   }, [hubId]);
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (tempHubId.length === 8) {
-      setHubId(tempHubId.toUpperCase());
+      const upperHubId = tempHubId.toUpperCase();
+      try {
+        // Link this worker to the hub on the backend for SMS alerts
+        if (token) {
+          await axios.put(`${CONFIG.API_BASE_URL}/profile/link-hub`,
+            { hubId: upperHubId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await updateUser({ linkedHubId: upperHubId });
+        }
+      } catch (err: any) {
+        // If hub not found, show error and don't connect
+        if (err.response?.status === 404) {
+          Alert.alert("Hub Not Found", "This Hub ID doesn't exist. Please check and try again.");
+          return;
+        }
+        // Other errors: still connect locally but warn
+        console.warn('Could not link hub on server:', err.message);
+      }
+      setHubId(upperHubId);
     } else {
       Alert.alert("Invalid ID", "Please enter a valid 8-digit Hub ID.");
     }
@@ -244,7 +263,20 @@ export default function ListViewScreen() {
         {hubId ? (
           <View style={styles.hubInfoRow}>
              <Text style={styles.headerSubtitle}>{bins.filter(b => b.fillLevel >= 80).length} bins need attention</Text>
-             <TouchableOpacity onPress={() => setHubId(null)}>
+             <TouchableOpacity onPress={async () => {
+                  try {
+                    if (token) {
+                      await axios.put(`${CONFIG.API_BASE_URL}/profile/unlink-hub`,
+                        {},
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      await updateUser({ linkedHubId: null });
+                    }
+                  } catch (err) {
+                    console.warn('Could not unlink hub on server:', err);
+                  }
+                  setHubId(null);
+                }}>
                 <Text style={styles.changeHubText}>Switch Hub</Text>
              </TouchableOpacity>
           </View>
