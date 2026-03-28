@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
         default: true,
         description: "Controls whether the worker receives SMS alerts for full bins"
     },
+    linkedHubId: {
+        type: String,
+        trim: true,
+        default: null,
+        description: "The Hub ID this worker is linked to for receiving SMS alerts"
+    },
     createdAt: {
         type: Date,
         default: Date.now

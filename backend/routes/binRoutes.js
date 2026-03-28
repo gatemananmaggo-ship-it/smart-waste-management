@@ -142,12 +142,23 @@ router.patch('/:hardwareId', async (req, res) => {
         // Trigger SMS alert if fill level is high
         if (fillLevel >= 90) {
             const ownerUser = await User.findById(bin.owner);
-            if (ownerUser && ownerUser.phone && ownerUser.isAvailable !== false) {
-                console.log(`Triggering SMS alert for bin ${bin.hardwareId} at ${fillLevel}%`);
-                smsService.sendFullBinAlert(ownerUser.phone, bin.hardwareId, bin.address)
-                    .catch(err => console.error('Failed to send SMS:', err.message));
-            } else if (ownerUser && ownerUser.isAvailable === false) {
-                console.log(`Skipping SMS alert for bin ${bin.hardwareId} - Worker marked as unavailable`);
+            if (ownerUser) {
+                // Find all workers linked to this hub who are available
+                const linkedWorkers = await User.find({
+                    linkedHubId: ownerUser.hubId,
+                    isAvailable: { $ne: false },
+                    phone: { $exists: true, $ne: '' }
+                });
+
+                if (linkedWorkers.length > 0) {
+                    console.log(`Triggering SMS for bin ${bin.hardwareId} at ${fillLevel}% to ${linkedWorkers.length} worker(s)`);
+                    linkedWorkers.forEach(worker => {
+                        smsService.sendFullBinAlert(worker.phone, bin.hardwareId, bin.address)
+                            .catch(err => console.error(`Failed to send SMS to ${worker.phone}:`, err.message));
+                    });
+                } else {
+                    console.log(`No available linked workers found for hub ${ownerUser.hubId} — no SMS sent`);
+                }
             }
         }
 
