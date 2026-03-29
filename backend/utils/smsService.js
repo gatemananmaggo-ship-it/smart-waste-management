@@ -28,9 +28,10 @@ const sendFullBinAlert = async (phone, binId, area) => {
 
     if (SMS_CONFIG.PROVIDER === 'FAST2SMS') {
         const apiKeySet = !!process.env.SMS_API_KEY;
-        if (!apiKeySet) {
-            console.error('[SMS SERVICE] ERROR: SMS_API_KEY is not set in environment variables!');
-            return { success: false, message: 'API Key missing' };
+        if (!apiKeySet || SMS_CONFIG.API_KEY === 'YOUR_FAST2SMS_KEY') {
+            const errorMsg = !apiKeySet ? 'SMS_API_KEY is not set in environment variables!' : 'Default placeholder API key found! Please use a real Fast2SMS key.';
+            console.error(`[SMS SERVICE] ERROR: ${errorMsg}`);
+            return { success: false, message: errorMsg };
         }
         try {
             console.log(`[SMS SERVICE] Dispatching to Fast2SMS for ${phone}...`);
@@ -48,14 +49,16 @@ const sendFullBinAlert = async (phone, binId, area) => {
 
             if (response.data && response.data.return) {
                 console.log(`[SMS SERVICE] Success: Message sent to ${phone}. Request ID: ${response.data.request_id}`);
+                return response.data;
             } else {
-                console.warn(`[SMS SERVICE] Provider Warning: ${JSON.stringify(response.data)}`);
+                const errorMsg = response.data?.message || 'Unknown provider error';
+                console.warn(`[SMS SERVICE] Provider Rejected: ${JSON.stringify(response.data)}`);
+                return { success: false, message: errorMsg, details: response.data };
             }
-            return response.data;
         } catch (error) {
             const errorDetail = error.response?.data || error.message;
             console.error(`[SMS SERVICE] API Failure for ${phone}:`, errorDetail);
-            throw new Error(`Fast2SMS Failed for ${phone}: ${JSON.stringify(errorDetail)}`);
+            throw new Error(`Fast2SMS Failed for ${phone}: ${error.message}${error.response ? ' - ' + JSON.stringify(error.response.data) : ''}`);
         }
     }
 

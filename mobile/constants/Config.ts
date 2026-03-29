@@ -2,7 +2,7 @@
 const IS_LOCAL = false; // Change to false to use the live Render server
 
 const LOCAL_URL = 'http://192.168.1.6:5000';
-const LIVE_URL = 'https://smart-waste-api-epmw.onrender.com';
+const LIVE_URL = 'http://13.232.18.222:5000';
 
 const BASE_URL = IS_LOCAL ? LOCAL_URL : LIVE_URL;
 

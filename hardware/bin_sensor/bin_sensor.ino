@@ -17,7 +17,7 @@ const char *hardwareId = "BIN-001";
 
 // Server base URL
 const char *serverBaseUrl =
-    "https://smart-waste-api-epmw.onrender.com"; // Live Render server
+    "http://13.232.18.222:5000"; // Live AWS server
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY
