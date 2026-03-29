@@ -17,7 +17,7 @@ const char *hardwareId = "BIN-001";
 
 // Server base URL
 const char *serverBaseUrl =
-    "https://smart-waste-api-epmw.onrender.com"; // Live Render server
+    "http://13.232.18.222:5000"; // Live AWS server
 // const char* serverBaseUrl = "http://192.168.1.6:5000"; // Local Machine
 
 // Bin Calibration (in cm)
