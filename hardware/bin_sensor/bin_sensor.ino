@@ -16,8 +16,7 @@ const char *password = "up80gd0383";
 const char *hardwareId = "BIN-001";
 
 // Server base URL
-const char *serverBaseUrl =
-    "http://13.232.18.222:5000"; // Live AWS server
+const char *serverBaseUrl = "http://13.232.18.222:5000"; // Live AWS server
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY

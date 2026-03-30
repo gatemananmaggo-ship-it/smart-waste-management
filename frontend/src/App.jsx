@@ -32,7 +32,8 @@ function App() {
   const checkBackendStatus = async () => {
     setBackendStatus('checking');
     try {
-      console.log('Checking backend status at:', `${CONFIG.API_BASE_URL}/api/status`);
+      console.log('--- ATTEMPTING NESTED BACKEND CHECK ---');
+      console.log('Target URL:', `${CONFIG.API_BASE_URL}/api/status`);
       const response = await axios.get(`${CONFIG.API_BASE_URL}/api/status`, { timeout: 5000 });
       if (response.data && response.data.status === 'Active') {
         console.log('Backend is online');
