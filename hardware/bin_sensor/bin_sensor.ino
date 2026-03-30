@@ -84,8 +84,7 @@ void loop() {
 
   // 3. Send to Cloud (if WiFi is connected)
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure client;
-    client.setInsecure(); // Disable SSL certificate verification for NodeMCU
+    WiFiClient client; // Standard WiFiClient for HTTP (port 5000)
     HTTPClient http;
     String fullUrl = String(serverBaseUrl) + "/api/bins/" + String(hardwareId);
 
