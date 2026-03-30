@@ -5,6 +5,10 @@ const LOCAL_URL = 'http://192.168.1.6:5000';
 const LIVE_URL = 'http://13.232.18.222:5000';
 
 const BASE_URL = IS_LOCAL ? LOCAL_URL : LIVE_URL;
+console.log('--- FRONTEND CONFIG LOADED ---');
+console.log('IS_LOCAL:', IS_LOCAL);
+console.log('LIVE_URL:', LIVE_URL);
+console.log('BASE_URL:', BASE_URL);
 
 const CONFIG = {
     API_BASE_URL: BASE_URL,
