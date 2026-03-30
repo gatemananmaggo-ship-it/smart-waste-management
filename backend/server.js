@@ -14,15 +14,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    }
+        origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        credentials: true
+    },
+    transports: ['websocket', 'polling']
 });
 
 app.set('io', io);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -43,7 +49,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Socket.io Connection
 io.on('connection', (socket) => {
     console.log('A client connected:', socket.id);
-    
+
     socket.on('joinHub', (hubId) => {
         console.log(`Client ${socket.id} joined hub: ${hubId}`);
         socket.join(hubId);
