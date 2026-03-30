@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform, RefreshControl, TouchableOpacity, Modal, Switch } from 'react-native';
 import axios from 'axios';
 import CONFIG from '../../constants/Config';
-import { Trash2, AlertTriangle, CheckCircle, Scan, Navigation, LogOut, User } from 'lucide-react-native';
+import { Trash2, AlertTriangle, CheckCircle, Scan, Navigation, LogOut, User, Phone } from 'lucide-react-native';
 import { Linking, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useHub } from '../../context/HubContext';
@@ -26,8 +26,13 @@ export default function ListViewScreen() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { hubId, setHubId } = useHub();
-  const { user, logout } = useAuth();
+  const { user, logout, token, updateUser } = useAuth();
   const [tempHubId, setTempHubId] = useState('');
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [newPhone, setNewPhone] = useState(user?.phone || '');
+  const [isUpdatingPhone, setIsUpdatingPhone] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(user?.isAvailable !== false);
+  const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
 
   const fetchBins = async () => {
     if (!hubId) {
@@ -55,9 +60,28 @@ export default function ListViewScreen() {
     return () => clearInterval(intervalId);
   }, [hubId]);
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (tempHubId.length === 8) {
-      setHubId(tempHubId.toUpperCase());
+      const upperHubId = tempHubId.toUpperCase();
+      try {
+        // Link this worker to the hub on the backend for SMS alerts
+        if (token) {
+          await axios.put(`${CONFIG.API_BASE_URL}/profile/link-hub`,
+            { hubId: upperHubId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await updateUser({ linkedHubId: upperHubId });
+        }
+      } catch (err: any) {
+        // If hub not found, show error and don't connect
+        if (err.response?.status === 404) {
+          Alert.alert("Hub Not Found", "This Hub ID doesn't exist. Please check and try again.");
+          return;
+        }
+        // Other errors: still connect locally but warn
+        console.warn('Could not link hub on server:', err.message);
+      }
+      setHubId(upperHubId);
     } else {
       Alert.alert("Invalid ID", "Please enter a valid 8-digit Hub ID.");
     }
@@ -90,6 +114,47 @@ export default function ListViewScreen() {
 
     if (url) {
         Linking.openURL(url);
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    if (!newPhone || newPhone.length < 10) {
+      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
+      return;
+    }
+    setIsUpdatingPhone(true);
+    try {
+      await axios.put(`${CONFIG.API_BASE_URL}/profile/update-phone`, 
+        { phone: newPhone },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await updateUser({ phone: newPhone });
+      setShowPhoneModal(false);
+      Alert.alert("Success", "Phone number updated successfully!");
+    } catch (err: any) {
+      console.error("Error updating phone:", err);
+      Alert.alert("Error", err.response?.data?.message || "Failed to update phone number.");
+    } finally {
+      setIsUpdatingPhone(false);
+    }
+  };
+
+  const handleToggleAvailability = async (value: boolean) => {
+    setIsUpdatingAvailability(true);
+    try {
+      await axios.put(`${CONFIG.API_BASE_URL}/profile/update-availability`, 
+        { isAvailable: value },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsAvailable(value);
+      await updateUser({ isAvailable: value });
+      Alert.alert("Success", `SMS Alerts ${value ? 'enabled' : 'disabled'} successfully!`);
+    } catch (err: any) {
+      console.error("Error updating availability:", err);
+      Alert.alert("Error", err.response?.data?.message || "Failed to update availability.");
+      setIsAvailable(!value); // Revert state on error
+    } finally {
+      setIsUpdatingAvailability(false);
     }
   };
 
@@ -174,15 +239,44 @@ export default function ListViewScreen() {
             <User size={14} color="#38bdf8" />
             <Text style={styles.userNameText}>{user?.username}</Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <LogOut size={18} color="#ef4444" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f9ff', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20, borderWidth: 1, borderColor: '#e0f2fe' }}>
+              <Text style={{ fontSize: 10, color: '#0369a1', marginRight: 4, fontWeight: '600' }}>SMS</Text>
+              <Switch
+                value={isAvailable}
+                onValueChange={handleToggleAvailability}
+                disabled={isUpdatingAvailability}
+                style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                trackColor={{ false: '#cbd5e1', true: '#34d399' }}
+                thumbColor={isAvailable ? '#fff' : '#fff'}
+              />
+            </View>
+            <TouchableOpacity onPress={() => setShowPhoneModal(true)} style={styles.phoneButton}>
+              <Phone size={18} color="#38bdf8" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <LogOut size={18} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerTitle}>Bin Status</Text>
         {hubId ? (
           <View style={styles.hubInfoRow}>
              <Text style={styles.headerSubtitle}>{bins.filter(b => b.fillLevel >= 80).length} bins need attention</Text>
-             <TouchableOpacity onPress={() => setHubId(null)}>
+             <TouchableOpacity onPress={async () => {
+                  try {
+                    if (token) {
+                      await axios.put(`${CONFIG.API_BASE_URL}/profile/unlink-hub`,
+                        {},
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      await updateUser({ linkedHubId: null });
+                    }
+                  } catch (err) {
+                    console.warn('Could not unlink hub on server:', err);
+                  }
+                  setHubId(null);
+                }}>
                 <Text style={styles.changeHubText}>Switch Hub</Text>
              </TouchableOpacity>
           </View>
@@ -242,6 +336,54 @@ export default function ListViewScreen() {
           </TouchableOpacity>
         </>
       )}
+
+      {/* Phone Update Modal */}
+      <Modal
+        visible={showPhoneModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPhoneModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Phone Number</Text>
+            <Text style={styles.modalSub}>Receive SMS alerts when bins are full</Text>
+            
+            <View style={styles.modalInputContainer}>
+              <Phone size={20} color="#94a3b8" style={{ marginRight: 12 }} />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="9876543210"
+                placeholderTextColor="#94a3b8"
+                value={newPhone}
+                onChangeText={setNewPhone}
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.cancelButton} 
+                onPress={() => setShowPhoneModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                onPress={handleUpdatePhone}
+                disabled={isUpdatingPhone}
+              >
+                {isUpdatingPhone ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -306,6 +448,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#fee2e2',
+  },
+  phoneButton: {
+    padding: 8,
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
   },
   hubInfoRow: {
     flexDirection: 'row',
@@ -518,5 +667,73 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: '85%',
+    padding: 24,
+    borderRadius: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  modalSub: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 20,
+  },
+  modalInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
+    marginBottom: 24,
+  },
+  modalInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#0f172a',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+  },
+  cancelButtonText: {
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  saveButton: {
+    flex: 2,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#38bdf8',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: '700',
   }
 });

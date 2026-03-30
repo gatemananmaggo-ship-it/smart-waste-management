@@ -1,0 +1,65 @@
+const axios = require('axios');
+
+/**
+ * SMS Service for EcoSmart
+ * This service handles sending alerts to workers when bins are full.
+ * 
+ * To use a real provider (e.g. Fast2SMS), update the API_KEY and uncomment the send method.
+ */
+
+const SMS_CONFIG = {
+    ENABLED: true,
+    API_KEY: process.env.SMS_API_KEY || 'YOUR_FAST2SMS_KEY',
+    PROVIDER: 'FAST2SMS', // 'FAST2SMS' or 'TWILIO' or 'MOCK'
+};
+
+const sendFullBinAlert = async (phone, binId, area) => {
+    const message = `Alert: Bin ${binId} is 90% full. Location: ${area}. Please empty it. - EcoSmart`;
+
+    console.log(`[SMS SERVICE] Sending to ${phone}: ${message}`);
+    const maskedKey = SMS_CONFIG.API_KEY ? `${SMS_CONFIG.API_KEY.substring(0, 4)}...${SMS_CONFIG.API_KEY.slice(-4)}` : 'MISSING';
+    console.log(`[SMS SERVICE] Using API Key: ${maskedKey}`);
+
+
+    if (SMS_CONFIG.PROVIDER === 'MOCK') {
+        console.log('[SMS SERVICE] MOCK mode: Alert would be sent here.');
+        return { success: true, message: 'Mock SMS logged to console' };
+    }
+
+    if (SMS_CONFIG.PROVIDER === 'FAST2SMS') {
+        const apiKeySet = !!process.env.SMS_API_KEY;
+        if (!apiKeySet) {
+            console.error('[SMS SERVICE] ERROR: SMS_API_KEY is not set in environment variables!');
+            return { success: false, message: 'API Key missing' };
+        }
+        try {
+            console.log(`[SMS SERVICE] Dispatching to Fast2SMS for ${phone}...`);
+            const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+                route: 'q',
+                message: message,
+                language: 'english',
+                flash: 0,
+                numbers: phone,
+            }, {
+                headers: {
+                    "authorization": SMS_CONFIG.API_KEY
+                }
+            });
+
+            if (response.data && response.data.return) {
+                console.log(`[SMS SERVICE] Success: Message sent to ${phone}. Request ID: ${response.data.request_id}`);
+            } else {
+                console.warn(`[SMS SERVICE] Provider Warning: ${JSON.stringify(response.data)}`);
+            }
+            return response.data;
+        } catch (error) {
+            const errorDetail = error.response?.data || error.message;
+            console.error(`[SMS SERVICE] API Failure for ${phone}:`, errorDetail);
+            throw new Error(`Fast2SMS Failed for ${phone}: ${JSON.stringify(errorDetail)}`);
+        }
+    }
+
+    return { success: false, message: 'Provider not configured' };
+};
+
+module.exports = { sendFullBinAlert };

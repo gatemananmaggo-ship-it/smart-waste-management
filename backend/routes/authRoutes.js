@@ -17,7 +17,11 @@ const generateHubId = () => {
 // Register a new user
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, email, area_access, state, city, place } = req.body;
+        const { username, password, email, area_access, state, city, place, phone } = req.body;
+
+        if (!phone) {
+            return res.status(400).json({ message: 'Phone number is required for SMS alerts' });
+        }
 
         // Check if user already exists
         const existingUser = await User.findOne({ 
@@ -50,6 +54,7 @@ router.post('/register', async (req, res) => {
             state,
             city,
             place,
+            phone,
             hubId
         });
 
@@ -59,7 +64,9 @@ router.post('/register', async (req, res) => {
             user: {
                 id: newUser._id,
                 username: newUser.username,
-                hubId: newUser.hubId
+                hubId: newUser.hubId,
+                phone: newUser.phone,
+                isAvailable: newUser.isAvailable
             }
         });
     } catch (err) {
@@ -102,7 +109,9 @@ router.post('/login', async (req, res) => {
                 state: user.state,
                 city: user.city,
                 place: user.place,
-                hubId: user.hubId
+                hubId: user.hubId,
+                phone: user.phone,
+                isAvailable: user.isAvailable
             }
         });
     } catch (err) {

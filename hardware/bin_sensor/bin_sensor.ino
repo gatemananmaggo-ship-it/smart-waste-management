@@ -1,15 +1,15 @@
-#include <HTTPClient.h>
-#include <WiFi.h>
-
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 
 /**
- * EcoSmart bin_sensor.ino
- * Distance measurement and Cloud Reporting using ESP32
+ * EcoSmart bin_sensor.ino (NodeMCU Version)
+ * Distance measurement and Cloud Reporting using ESP8266/NodeMCU
  */
 
 // --- CONFIGURATION ---
-const char *ssid = "Wi-fi Name";
-const char *password = "Wi-fi Password";
+const char *ssid = "Airtel_Raptor 5g";
+const char *password = "up80gd0383";
 
 // The unique ID for this specific bin (must match the one registered in the web
 // UI)
@@ -17,18 +17,20 @@ const char *hardwareId = "BIN-001";
 
 // Server base URL
 const char *serverBaseUrl =
+<<<<<<< HEAD
     "http://13.232.18.222:5000"; // Live AWS server
 // const char* serverBaseUrl = "http://192.168.1.6:5000"; // Local Machine
+=======
+    "https://smart-waste-api-epmw.onrender.com"; // Live Render server
+>>>>>>> 4ee32f425e00ef7073a39995a94fe5cb48147fbe
 
 // Bin Calibration (in cm)
 const int MAX_DISTANCE = 50; // Distance when bin is EMPTY
 const int MIN_DISTANCE = 5;  // Distance when bin is FULL
 
-// Pin Definitions
-const int TRIG_PIN = 5; // the ESP32 that the sensor's "Trigger" wire is
-                        // connected to pin number 5
-const int ECHO_PIN =
-    18; // the ESP32 that the sensor's "Echo" wire is connected to pin number 18
+// Pin Definitions for NodeMCU (D-Pins map to GPIO numbers)
+const int TRIG_PIN = D5; // NodeMCU D5 corresponds to GPIO 14
+const int ECHO_PIN = D6; // NodeMCU D6 corresponds to GPIO 12
 
 // Constants
 const float SOUND_VELOCITY = 0.034; // cm/us
@@ -51,7 +53,7 @@ void setup() {
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("--- EcoSmart Bin Sensor Initialized ---");
+  Serial.println("--- EcoSmart Bin Sensor (NodeMCU) Initialized ---");
 }
 
 void loop() {
@@ -72,9 +74,7 @@ void loop() {
   }
 
   // 2. Calculate Fill Level Percentage
-  // Constrain distance within our calibration limits
   float constrainedDist = constrain(distanceCm, MIN_DISTANCE, MAX_DISTANCE);
-  // Map distance to percentage (lower distance = higher fill)
   int fillLevel = map(constrainedDist, MAX_DISTANCE, MIN_DISTANCE, 0, 100);
 
   // Determine Status
@@ -89,9 +89,13 @@ void loop() {
 
   // 3. Send to Cloud (if WiFi is connected)
   if (WiFi.status() == WL_CONNECTED) {
+    WiFiClientSecure client;
+    client.setInsecure(); // Disable SSL certificate verification for NodeMCU
     HTTPClient http;
     String fullUrl = String(serverBaseUrl) + "/api/bins/" + String(hardwareId);
-    http.begin(fullUrl);
+
+    // Begin request
+    http.begin(client, fullUrl);
     http.addHeader("Content-Type", "application/json");
 
     // Construct JSON payload
@@ -99,7 +103,7 @@ void loop() {
                              ",\"status\":\"" + status + "\"}";
 
     Serial.print("Sending to cloud... ");
-    int httpResponseCode = http.sendRequest("PATCH", httpRequestData);
+    int httpResponseCode = http.PATCH(httpRequestData);
 
     if (httpResponseCode > 0) {
       Serial.print("HTTP Response code: ");

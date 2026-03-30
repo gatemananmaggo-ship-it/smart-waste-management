@@ -5,6 +5,7 @@ const BinHistory = require('../models/BinHistory');
 const History = require('../models/History'); // New Hub-wide history
 const User = require('../models/User');
 const auth = require('../middleware/authMiddleware');
+const smsService = require('../utils/smsService');
 
 // GET all bins for the logged-in user
 router.get('/', auth, async (req, res) => {
@@ -100,7 +101,7 @@ router.patch('/:hardwareId', async (req, res) => {
                 status,
                 lastUpdated: Date.now()
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!bin) return res.status(404).json({ message: 'Bin not found' });
@@ -135,6 +136,40 @@ router.patch('/:hardwareId', async (req, res) => {
                     timestamp: hubHistory.timestamp,
                     fillLevel: hubHistory.averageFillLevel
                 });
+            }
+        }
+
+        // Trigger SMS alert if fill level is high
+        if (fillLevel >= 90) {
+            const ownerUser = await User.findById(bin.owner);
+            if (ownerUser) {
+                // Find all workers linked to this hub who are available
+                const linkedWorkers = await User.find({
+                    linkedHubId: ownerUser.hubId,
+                    isAvailable: { $ne: false },
+                    phone: { $exists: true, $ne: '' }
+                });
+
+                // Build recipient list (Admin + Workers)
+                const recipients = [];
+                if (ownerUser.phone) {
+                    recipients.push({ name: 'Admin', phone: ownerUser.phone });
+                }
+                
+                linkedWorkers.forEach(worker => {
+                    recipients.push({ name: worker.username, phone: worker.phone });
+                });
+
+                if (recipients.length > 0) {
+                    console.log(`[SMS] Triggering alerts for bin ${bin.hardwareId} (${fillLevel}%) to ${recipients.length} recipient(s)`);
+                    recipients.forEach(recipient => {
+                        smsService.sendFullBinAlert(recipient.phone, bin.hardwareId, bin.address)
+                            .then(() => console.log(`[SMS] Success: Sent to ${recipient.name} at ${recipient.phone}`))
+                            .catch(err => console.error(`[SMS] Failed: Could not send to ${recipient.name}:`, err.message));
+                    });
+                } else {
+                    console.log(`[SMS] No recipients (admin or available workers) found for hub ${ownerUser.hubId}`);
+                }
             }
         }
 

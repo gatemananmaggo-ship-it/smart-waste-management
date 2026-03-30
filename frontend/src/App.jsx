@@ -426,7 +426,7 @@ function App() {
         borderRadius: '8px', zIndex: 10000, fontSize: '10px', color: '#38bdf8',
         border: '1px solid rgba(56,189,248,0.3)', pointerEvents: 'none'
       }}>
-        API: {CONFIG.API_BINS} | Bins: {bins.length} | User: {user?.username}
+        AWS API: {CONFIG.API_BINS} | Bins: {bins.length} | User: {user?.username}
       </div>
     </div>
   );

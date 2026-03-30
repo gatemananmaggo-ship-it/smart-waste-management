@@ -41,6 +41,23 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    phone: {
+        type: String,
+        required: true,
+        trim: true,
+        description: "Indian mobile number (10 digits)"
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true,
+        description: "Controls whether the worker receives SMS alerts for full bins"
+    },
+    linkedHubId: {
+        type: String,
+        trim: true,
+        default: null,
+        description: "The Hub ID this worker is linked to for receiving SMS alerts"
+    },
     createdAt: {
         type: Date,
         default: Date.now
