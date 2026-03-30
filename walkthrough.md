@@ -5,7 +5,7 @@ The connection between your mobile app and the backend server is established thr
 ## 1. Centralized Configuration
 The mobile app uses a central file to manage its connection settings:
 - **File**: [Config.ts](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/mobile/constants/Config.ts)
-- **URL**: It is currently set to use the **Live Render Server**: `https://smart-waste-api-epmw.onrender.com`
+- **URL**: It is currently set to use the **Live AWS Server**: `http://13.232.18.222:5000`
 - **Toggle**: You can switch between local and live environments by changing `const IS_LOCAL = true/false;` in this file.
 
 ## 2. Authentication (Login & Register)
@@ -26,7 +26,7 @@ To show the latest bin levels on the map and list:
 ```mermaid
 sequenceDiagram
     participant Mobile as Mobile App
-    participant Backend as Express Server (Render)
+    participant Backend as Express Server (AWS)
     participant DB as MongoDB
 
     Note over Mobile: App starts, loads Token & Hub ID

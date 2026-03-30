@@ -1,0 +1,54 @@
+# LoRa Gateway & Transmitter Walkthrough
+
+I have implemented a dual-hardware system for your "Smart Waste Management" project using the **NodeMCU ESP8266**, **HC-SR04**, and **RYLR998 LoRa transceivers**.
+
+## Hardware Architecture
+
+```mermaid
+graph LR
+    subgraph "Bin Node 1 (Transmitter)"
+        T1["HC-SR04"] --> N1["NodeMCU"]
+        N1 --> L1["RYLR998"]
+    end
+    subgraph "Bin Node 2 (Transmitter)"
+        T2["HC-SR04"] --> N2["NodeMCU"]
+        N2 --> L2["RYLR998"]
+    end
+    L1 -. "LoRa" .-> LGR["Gateway Node (Receiver)"]
+    L2 -. "LoRa" .-> LGR
+    LGR --> NG["NodeMCU"]
+    NG -- "WiFi" --> AWS["AWS Backend"]
+```
+
+## 1. Bin Transmitter Setup
+
+The [lora_transmitter.ino](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/hardware/bin_sensor/lora_transmitter.ino) file handles the sensor measurement and LoRa transmission.
+
+> [!IMPORTANT]
+> **Deep Sleep Connection**: You MUST connect a wire between **RST** and **D0** on the NodeMCU. Without this, the board will not wake up from sleep!
+> 
+> **Wiring Checklist**:
+> - HC-SR04 VCC -> 5V Boost
+> - HC-SR04 Echo -> D6 (NodeMCU) via Voltage Divider
+> - RYLR998 TX -> D1 (NodeMCU)
+> - RYLR998 RX -> D2 (NodeMCU)
+
+## 2. Gateway Receiver Setup
+
+The [lora_gateway.ino](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/hardware/bin_sensor/lora_gateway.ino) file listens for data from all bins and forwards it to your live AWS server.
+
+> [!WARNING]
+> **Gateway Power**: The Gateway cannot use Deep Sleep. It must stay connected to a power source to receive reports from the bins at any time.
+>
+> **WiFi Config**: Update the `ssid` and `password` in the code if your network changes.
+
+## 3. Communication Protocol
+
+The bins send a lightweight comma-separated string to minimize air-time:
+`[BIN_ID],[FILL_LEVEL],[STATUS]`
+Example: `BIN-001,85,Full`
+
+## Performance Tips
+
+1.  **Baud Rate**: If you see garbage characters in the Serial Monitor for LoRa, use `AT+IPR=9600` on the RYLR998 modules to lower the baud rate for more reliable `SoftwareSerial` performance.
+2.  **Antenna**: Ensure the brass coil antenna is soldered securely for maximum range (up to several KM line-of-sight).
