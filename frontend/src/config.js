@@ -1,6 +1,5 @@
 // Centralized API configuration for the frontend
 const IS_LOCAL = false; // Change to false to use the live AWS server
-const IS_LOCAL = false; // Change to false to use the live AWS server
 
 const LOCAL_URL = 'http://192.168.1.6:5000';
 const LIVE_URL = 'https://13-232-18-222.sslip.io';
