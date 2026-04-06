@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Map as MapIcon, BarChart3, Trash2, Settings, AlertTriangle, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Map as MapIcon, BarChart3, Trash2, Settings, AlertTriangle, LogOut, User, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,6 +11,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
         { id: 'map', icon: MapIcon, label: t('live_map') },
         { id: 'analytics', icon: BarChart3, label: t('analytics') },
         { id: 'bins', icon: Trash2, label: t('smart_bins') },
+        { id: 'workers', icon: Users, label: t('workers') },
         { id: 'settings', icon: Settings, label: t('settings') },
     ];
 
@@ -88,21 +89,21 @@ const Sidebar = ({ activeView, setActiveView }) => {
                 boxShadow: '0 4px 20px rgba(56, 189, 248, 0.1)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-                    <div style={{ 
-                        width: '32px', height: '32px', borderRadius: '50%', 
+                    <div style={{
+                        width: '32px', height: '32px', borderRadius: '50%',
                         background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                     }}>
                         <User size={16} color="white" />
                     </div>
                     <div style={{ overflow: 'hidden' }}>
-                        <p style={{ 
-                            fontSize: '0.9rem', fontWeight: 600, margin: 0, 
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
+                        <p style={{
+                            fontSize: '0.9rem', fontWeight: 600, margin: 0,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                         }}>
                             {user?.username}
                         </p>
-                        <p style={{ 
+                        <p style={{
                             fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0,
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                         }}>
@@ -110,12 +111,12 @@ const Sidebar = ({ activeView, setActiveView }) => {
                         </p>
                     </div>
                 </div>
-                
-                <button 
+
+                <button
                     onClick={logout}
-                    style={{ 
-                        display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', 
-                        color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', padding: '4px 0', opacity: 0.8 
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
+                        color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', padding: '4px 0', opacity: 0.8
                     }}
                     onMouseOver={e => e.currentTarget.style.opacity = 1}
                     onMouseOut={e => e.currentTarget.style.opacity = 0.8}

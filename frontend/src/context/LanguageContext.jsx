@@ -37,7 +37,8 @@ const translations = {
         dark: "Dark",
         light: "Light",
         system_status: "System Status",
-        all_systems_online: "All Systems Online"
+        all_systems_online: "All Systems Online",
+        workers: "Workers"
     },
     hi: {
         overview: "अवलोकन",
@@ -75,7 +76,8 @@ const translations = {
         dark: "डार्क",
         light: "लाइट",
         system_status: "सिस्टम की स्थिति",
-        all_systems_online: "सभी सिस्टम ऑनलाइन हैं"
+        all_systems_online: "सभी सिस्टम ऑनलाइन हैं",
+        workers: "कर्मचारी"
     },
     bn: {
         overview: "সংক্ষিপ্ত বিবরণ",
@@ -113,7 +115,8 @@ const translations = {
         dark: "ডার্ক",
         light: "লাইট",
         system_status: "সিস্টেম স্ট্যাটাস",
-        all_systems_online: "সমস্ত সিস্টেম অনলাইন"
+        all_systems_online: "সমস্ত সিস্টেম অনলাইন",
+        workers: "কর্মচারী"
     },
     te: {
         overview: "అవలోకనం",
@@ -151,7 +154,8 @@ const translations = {
         dark: "డార్క్",
         light: "లైట్",
         system_status: "సిస్టమ్ స్థితి",
-        all_systems_online: "అన్ని సిస్టమ్స్ ఆన్లైన్"
+        all_systems_online: "అన్ని సిస్టమ్స్ ఆన్లైన్",
+        workers: "కార్మికులు"
     },
     mr: {
         overview: "आढावा",
@@ -189,7 +193,8 @@ const translations = {
         dark: "डार्क",
         light: "लाईट",
         system_status: "सिस्टम स्थिती",
-        all_systems_online: "सर्व सिस्टम ऑनलाइन"
+        all_systems_online: "सर्व सिस्टम ऑनलाइन",
+        workers: "कामगार"
     },
     ta: {
         overview: "மேலோட்டம்",
@@ -227,7 +232,8 @@ const translations = {
         dark: "டார்க்",
         light: "லைட்",
         system_status: "கணினி நிலை",
-        all_systems_online: "அனைத்து அமைப்புகளும் ஆன்லைனில்"
+        all_systems_online: "அனைத்து அமைப்புகளும் ஆன்லைனில்",
+        workers: "பணியாளர்கள்"
     }
 };
 

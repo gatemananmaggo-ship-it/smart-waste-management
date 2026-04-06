@@ -335,6 +335,13 @@ function App() {
             <BinTable bins={bins} onEmptyBin={handleEmptyBin} onRemoveBin={handleRemoveBin} />
           </div>
         );
+      case 'workers':
+        return (
+          <div style={{ color: 'white', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+            <h2>Workers Management</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>This feature is coming soon.</p>
+          </div>
+        );
       case 'overview':
       default:
         return (
