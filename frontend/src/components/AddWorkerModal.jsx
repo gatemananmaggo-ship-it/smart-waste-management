@@ -36,7 +36,13 @@ const AddWorkerModal = ({ onClose }) => {
             onClose();
         } catch (err) {
             console.error('Failed to add worker:', err);
-            setError(err.response?.data?.message || 'Failed to add worker. Username might be taken.');
+            
+            // Check if it's a 404 meaning the endpoint doesn't exist on the server yet
+            if (err.response?.status === 404) {
+                setError('Feature unavailable. (Make sure your backend server has the new code and was restarted!).');
+            } else {
+                setError(err.response?.data?.message || 'An error occurred while saving the worker.');
+            }
         } finally {
             setLoading(false);
         }
