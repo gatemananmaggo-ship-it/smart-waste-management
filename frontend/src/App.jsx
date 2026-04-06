@@ -12,6 +12,8 @@ import AddBinModal from './components/AddBinModal';
 import Login from './components/Login';
 import Register from './components/Register';
 import Settings from './components/Settings';
+import WorkersManagement from './components/WorkersManagement';
+import AddWorkerModal from './components/AddWorkerModal';
 import { useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import CONFIG from './config';
@@ -28,6 +30,7 @@ function App() {
   const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'online', 'offline'
   const [activeView, setActiveView] = useState('overview');
   const [showAddBin, setShowAddBin] = useState(false);
+  const [showAddWorker, setShowAddWorker] = useState(false);
 
   const checkBackendStatus = async () => {
     setBackendStatus('checking');
@@ -337,9 +340,8 @@ function App() {
         );
       case 'workers':
         return (
-          <div style={{ color: 'white', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-            <h2>Workers Management</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>This feature is coming soon.</p>
+          <div className="grid grid-cols-1">
+            <WorkersManagement onAddWorkerClick={() => setShowAddWorker(true)} />
           </div>
         );
       case 'overview':
@@ -424,6 +426,10 @@ function App() {
           onClose={() => setShowAddBin(false)}
           onBinAdded={handleBinAdded}
         />
+      )}
+
+      {showAddWorker && (
+        <AddWorkerModal onClose={() => setShowAddWorker(false)} />
       )}
 
       {/* Debug Info Panel */}

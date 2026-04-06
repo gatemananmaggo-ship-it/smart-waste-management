@@ -11,6 +11,7 @@ const CONFIG = {
     API_URL: `${BASE_URL}/api`,
     API_BINS: `${BASE_URL}/api/bins`,
     API_AUTH: `${BASE_URL}/api/auth`,
+    API_WORKERS: `${BASE_URL}/api/workers`,
     SOCKET_URL: BASE_URL
 };
 

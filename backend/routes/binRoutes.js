@@ -4,6 +4,7 @@ const Bin = require('../models/Bin');
 const BinHistory = require('../models/BinHistory');
 const History = require('../models/History'); // New Hub-wide history
 const User = require('../models/User');
+const Worker = require('../models/Worker');
 const auth = require('../middleware/authMiddleware');
 const smsService = require('../utils/smsService');
 
@@ -144,7 +145,7 @@ router.patch('/:hardwareId', async (req, res) => {
             const ownerUser = await User.findById(bin.owner);
             if (ownerUser) {
                 // Find all workers linked to this hub who are available
-                const linkedWorkers = await User.find({
+                const linkedWorkers = await Worker.find({
                     linkedHubId: ownerUser.hubId,
                     isAvailable: { $ne: false },
                     phone: { $exists: true, $ne: '' }
