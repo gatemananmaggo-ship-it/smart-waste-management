@@ -58,12 +58,6 @@ const userSchema = new mongoose.Schema({
         default: null,
         description: "The Hub ID this worker is linked to for receiving SMS alerts"
     },
-    pushToken: {
-        type: String,
-        trim: true,
-        default: null,
-        description: "Expo Push Token for mobile notifications"
-    },
     createdAt: {
         type: Date,
         default: Date.now
