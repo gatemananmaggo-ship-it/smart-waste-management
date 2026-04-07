@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const Worker = require('../models/Worker');
 const auth = require('../middleware/authMiddleware');
 
 // @route   PUT api/profile/change-password
@@ -15,9 +16,10 @@ router.put('/change-password', auth, async (req, res) => {
             return res.status(400).json({ message: 'Please provide both current and new passwords' });
         }
 
-        const user = await User.findById(req.user.id);
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Account not found' });
         }
 
         // Check current password
@@ -49,9 +51,10 @@ router.put('/update-phone', auth, async (req, res) => {
             return res.status(400).json({ message: 'Please provide a phone number' });
         }
 
-        const user = await User.findById(req.user.id);
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Account not found' });
         }
 
         user.phone = phone;
@@ -78,9 +81,10 @@ router.put('/update-availability', auth, async (req, res) => {
             return res.status(400).json({ message: 'Please provide availability status' });
         }
 
-        const user = await User.findById(req.user.id);
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Account not found' });
         }
 
         user.isAvailable = isAvailable;
@@ -113,9 +117,10 @@ router.put('/link-hub', auth, async (req, res) => {
             return res.status(404).json({ message: 'Hub not found. Please check the Hub ID.' });
         }
 
-        const user = await User.findById(req.user.id);
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Account not found' });
         }
 
         user.linkedHubId = hubId;
@@ -136,9 +141,10 @@ router.put('/link-hub', auth, async (req, res) => {
 // @access  Private
 router.put('/unlink-hub', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Account not found' });
         }
 
         user.linkedHubId = null;

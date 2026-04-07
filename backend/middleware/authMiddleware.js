@@ -12,7 +12,8 @@ const auth = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (err) {
-        res.status(401).json({ message: 'Token is not valid' });
+        console.warn(`[AUTH] Invalid token from ${req.ip}: ${err.message}`);
+        res.status(401).json({ message: 'Token is not valid or expired' });
     }
 };
 
