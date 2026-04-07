@@ -8,6 +8,7 @@ const Worker = require('../models/Worker');
 const Notification = require('../models/Notification');
 const auth = require('../middleware/authMiddleware');
 const smsService = require('../utils/smsService');
+const pushService = require('../utils/pushNotificationService');
 const { calculateDistance } = require('../utils/geoUtils');
 
 // GET all bins for the logged-in user
@@ -177,6 +178,7 @@ router.patch('/:hardwareId', async (req, res) => {
                         id: ownerUser._id, 
                         name: 'Admin', 
                         phone: ownerUser.phone, 
+                        pushToken: ownerUser.pushToken,
                         type: 'User' 
                     });
                 }
@@ -190,6 +192,7 @@ router.patch('/:hardwareId', async (req, res) => {
                         id: selectedWorker.id,
                         name: selectedWorker.name,
                         phone: selectedWorker.phone,
+                        pushToken: selectedWorker.pushToken,
                         type: 'Worker'
                     });
                     console.log(`[Algorithm] Selected closest worker: ${selectedWorker.name} (${selectedWorker.distance.toFixed(2)} km away)`);
@@ -200,6 +203,7 @@ router.patch('/:hardwareId', async (req, res) => {
                             id: worker._id, 
                             name: worker.username, 
                             phone: worker.phone, 
+                            pushToken: worker.pushToken,
                             type: 'Worker' 
                         });
                     });
@@ -235,6 +239,17 @@ router.patch('/:hardwareId', async (req, res) => {
                             newNotif.save()
                                 .then(() => console.log(`[In-App Notification] Created for ${recipient.name}`))
                                 .catch(err => console.error(`[In-App Notification] Failed:`, err.message));
+                            
+                            // 3. Send Push Notification
+                            if (recipient.pushToken) {
+                                pushService.sendPushNotification(
+                                    [recipient.pushToken],
+                                    `🚨 Smart Waste Alert: Bin ${bin.hardwareId}`,
+                                    `Bin is ${fillLevel}% full at ${bin.address}. Please check it.`,
+                                    { binId: bin.hardwareId, fillLevel: fillLevel }
+                                ).then(() => console.log(`[Push Notification] Sent to ${recipient.name}`))
+                                 .catch(err => console.error(`[Push Notification] Failed for ${recipient.name}:`, err.message));
+                            }
                         }
                     });
                 }

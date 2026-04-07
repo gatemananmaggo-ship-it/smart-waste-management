@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import CONFIG from '../constants/Config';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 interface User {
   id: string;
@@ -34,6 +36,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { expoPushToken } = usePushNotifications();
+
+  useEffect(() => {
+    if (token && expoPushToken) {
+      const syncPushToken = async () => {
+        try {
+          await axios.put(`${CONFIG.API_BASE_URL}/profile/push-token`, 
+            { pushToken: expoPushToken },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log('Push token synced to backend');
+        } catch (e) {
+          console.error('Failed to sync push token', e);
+        }
+      };
+      syncPushToken();
+    }
+  }, [token, expoPushToken]);
 
   useEffect(() => {
     // Load stored token on app start

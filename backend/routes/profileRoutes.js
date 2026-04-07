@@ -157,4 +157,33 @@ router.put('/unlink-hub', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/profile/push-token
+// @desc    Update user/worker push token for mobile notifications
+// @access  Private
+router.put('/push-token', auth, async (req, res) => {
+    try {
+        const { pushToken } = req.body;
+        
+        if (!pushToken) {
+            return res.status(400).json({ message: 'Push token is required' });
+        }
+
+        const Model = req.user.role === 'worker' ? Worker : User;
+        const user = await Model.findByIdAndUpdate(
+            req.user.id,
+            { pushToken },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'Account not found' });
+        }
+
+        res.json({ message: 'Push token updated successfully' });
+    } catch (err) {
+        console.error('Push token update error:', err);
+        res.status(500).json({ message: 'Server error during push token update' });
+    }
+});
+
 module.exports = router;

@@ -34,6 +34,11 @@ const workerSchema = new mongoose.Schema({
     lastLocationUpdate: {
         type: Date
     },
+    pushToken: {
+        type: String,
+        trim: true,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now
