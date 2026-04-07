@@ -18,7 +18,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
     return (
         <aside className="glass" style={{
             width: 'var(--sidebar-width)',
-            height: 'calc(100vh - 40px)',
+            height: 'calc(100vh + 25px)',
             position: 'fixed',
             top: '20px',
             left: '20px',
