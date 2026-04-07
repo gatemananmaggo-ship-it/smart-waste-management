@@ -42,6 +42,23 @@ const WorkersManagement = ({ onAddWorkerClick }) => {
         }
     };
 
+    const handleToggleAvailability = async (workerId, currentStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const newStatus = !currentStatus;
+            await axios.patch(`${CONFIG.API_WORKERS}/${workerId}`, 
+                { isAvailable: newStatus },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setWorkers(prev => prev.map(w => 
+                w._id === workerId ? { ...w, isAvailable: newStatus } : w
+            ));
+        } catch (err) {
+            console.error('Failed to toggle worker status:', err);
+            alert('Failed to update worker status.');
+        }
+    };
+
     // Allow parent to tell us when a worker was added so we can refresh the list
     useEffect(() => {
         const handleWorkerAdded = () => {
@@ -147,15 +164,22 @@ const WorkersManagement = ({ onAddWorkerClick }) => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '16px' }}>
-                                        {worker.isAvailable ? (
-                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
-                                                <CheckCircle size={14} /> Active
-                                            </span>
-                                        ) : (
-                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
-                                                <XCircle size={14} /> Paused
-                                            </span>
-                                        )}
+                                        <button
+                                            onClick={() => handleToggleAvailability(worker._id, worker.isAvailable)}
+                                            style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '6px', 
+                                                background: worker.isAvailable ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                                                color: worker.isAvailable ? '#10b981' : '#ef4444', 
+                                                padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem',
+                                                border: `1px solid ${worker.isAvailable ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                                                cursor: 'pointer', transition: 'all 0.2s',
+                                                fontWeight: 600
+                                            }}
+                                            onMouseOver={e => e.currentTarget.style.background = worker.isAvailable ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}
+                                            onMouseOut={e => e.currentTarget.style.background = worker.isAvailable ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}
+                                        >
+                                            {worker.isAvailable ? (<><CheckCircle size={14} /> Active</>) : (<><XCircle size={14} /> On Leave</>)}
+                                        </button>
                                     </td>
                                     <td style={{ padding: '16px', textAlign: 'right' }}>
                                         <button 

@@ -35,6 +35,15 @@ const binSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    assignedWorker: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Worker',
+        default: null
+    },
+    assignedAt: {
+        type: Date,
+        default: null
     }
 });
 

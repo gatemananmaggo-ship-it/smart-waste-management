@@ -13,7 +13,7 @@ const { calculateDistance } = require('../utils/geoUtils');
 router.get('/', auth, async (req, res) => {
     try {
         console.log('Fetching bins for user ID:', req.user.id);
-        const bins = await Bin.find({ owner: req.user.id });
+        const bins = await Bin.find({ owner: req.user.id }).populate('assignedWorker', 'username');
         console.log(`Found ${bins.length} bins for user ${req.user.id}`);
         
         // Fetch Hub-wide history for trends
@@ -141,7 +141,7 @@ router.patch('/:hardwareId', async (req, res) => {
             }
         }
 
-        // Trigger SMS alert if fill level is high
+        // Handle Worker Allocation and Clearing
         if (fillLevel >= 90) {
             const ownerUser = await User.findById(bin.owner);
             if (ownerUser) {
@@ -156,6 +156,7 @@ router.patch('/:hardwareId', async (req, res) => {
                 const workersWithDistance = linkedWorkers
                     .filter(w => w.location?.latitude && w.location?.longitude)
                     .map(worker => ({
+                        id: worker._id,
                         name: worker.username,
                         phone: worker.phone,
                         distance: calculateDistance(
@@ -169,24 +170,33 @@ router.patch('/:hardwareId', async (req, res) => {
                 // Sort by distance (ascending)
                 workersWithDistance.sort((a, b) => a.distance - b.distance);
 
-                // Build recipient list: Admin + Closest Worker
                 const recipients = [];
                 if (ownerUser.phone) {
                     recipients.push({ name: 'Admin', phone: ownerUser.phone });
                 }
+
+                let selectedWorker = null;
                 
                 // Add the closest worker if available
                 if (workersWithDistance.length > 0) {
-                    const closest = workersWithDistance[0];
-                    recipients.push(closest);
-                    console.log(`[SMS] Selected closest worker: ${closest.name} (${closest.distance.toFixed(2)} km away)`);
+                    selectedWorker = workersWithDistance[0];
+                    recipients.push(selectedWorker);
+                    console.log(`[Algorithm] Selected closest worker: ${selectedWorker.name} (${selectedWorker.distance.toFixed(2)} km away)`);
                 } else if (linkedWorkers.length > 0) {
-                    // Fallback: If no workers have location data, but some are available, alert the first one (or all?)
-                    // For now, let's alert all available workers if location data is missing to ensure task coverage.
+                    // Fallback: Notify all if no location data
                     linkedWorkers.forEach(worker => {
                         recipients.push({ name: worker.username, phone: worker.phone });
                     });
-                    console.log(`[SMS] No workers have location data. Alerting all ${linkedWorkers.length} available workers.`);
+                    console.log(`[Algorithm] No workers have location data. Alerting all ${linkedWorkers.length} available workers.`);
+                }
+
+                // PERSIST ASSIGNMENT
+                if (selectedWorker) {
+                    await Bin.findByIdAndUpdate(bin._id, {
+                        assignedWorker: selectedWorker.id,
+                        assignedAt: Date.now(),
+                        status: 'Full'
+                    });
                 }
 
                 if (recipients.length > 0) {
@@ -196,9 +206,17 @@ router.patch('/:hardwareId', async (req, res) => {
                             .then(() => console.log(`[SMS] Success: Sent to ${recipient.name} at ${recipient.phone}`))
                             .catch(err => console.error(`[SMS] Failed: Could not send to ${recipient.name}:`, err.message));
                     });
-                } else {
-                    console.log(`[SMS] No recipients (admin or available workers) found for hub ${ownerUser.hubId}`);
                 }
+            }
+        } else if (fillLevel < 10) {
+            // Clear assignment if bin is emptied
+            if (bin.assignedWorker) {
+                console.log(`[Algorithm] Bin ${bin.hardwareId} emptied. Clearing assignment for worker ${bin.assignedWorker}`);
+                await Bin.findByIdAndUpdate(bin._id, {
+                    assignedWorker: null,
+                    assignedAt: null,
+                    status: 'Empty'
+                });
             }
         }
 

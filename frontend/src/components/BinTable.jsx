@@ -19,6 +19,7 @@ const BinTable = ({ bins, onEmptyBin, onRemoveBin }) => {
                             <th style={{ padding: '16px 24px' }}>Fill Level</th>
                             <th style={{ padding: '16px 24px' }}>Battery</th>
                             <th style={{ padding: '16px 24px' }}>Status</th>
+                            <th style={{ padding: '16px 24px' }}>Assigned To</th>
                             <th style={{ padding: '16px 24px' }}>Action</th>
                         </tr>
                     </thead>
@@ -65,6 +66,27 @@ const BinTable = ({ bins, onEmptyBin, onRemoveBin }) => {
                                     }}>
                                         {bin.status}
                                     </span>
+                                </td>
+                                <td style={{ padding: '16px 24px' }}>
+                                    {bin.assignedWorker ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ 
+                                                width: '24px', height: '24px', borderRadius: '50%', 
+                                                background: 'rgba(56,189,248,0.1)', display: 'flex', 
+                                                alignItems: 'center', justifyContent: 'center', color: '#38bdf8',
+                                                fontSize: '0.7rem', fontWeight: 700
+                                            }}>
+                                                {bin.assignedWorker.username.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span style={{ fontSize: '0.85rem', color: 'white', fontWeight: 500 }}>
+                                                {bin.assignedWorker.username}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                                            Unassigned
+                                        </span>
+                                    )}
                                 </td>
                                 <td style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '0' }}>
                                     <button

@@ -109,4 +109,33 @@ router.patch('/location', auth, async (req, res) => {
     }
 });
 
+// PATCH update worker status (isAvailable)
+router.patch('/:id', auth, async (req, res) => {
+    try {
+        const { isAvailable } = req.body;
+        
+        if (isAvailable === undefined) {
+            return res.status(400).json({ message: 'isAvailable status is required.' });
+        }
+
+        const user = await User.findById(req.user.id);
+        
+        // Ensure only the linked hub admin can update worker status
+        const worker = await Worker.findOneAndUpdate(
+            { _id: req.params.id, linkedHubId: user.hubId },
+            { isAvailable },
+            { new: true }
+        ).select('-password');
+
+        if (!worker) {
+            return res.status(404).json({ message: 'Worker not found.' });
+        }
+
+        res.json(worker);
+    } catch (err) {
+        console.error('Worker status update error:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;
