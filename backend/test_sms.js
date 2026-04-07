@@ -24,10 +24,10 @@ async function testSMS() {
         console.log('\n--- API Response ---');
         console.log(JSON.stringify(result, null, 2));
         
-        if (result && (result.return === true || result.status === 'success' || result.request_id)) {
+        if (result && (result.success === true || result.return === true || result.status === 'success' || result.request_id)) {
             console.log('\n✅ SMS API seems to be working! (Check your phone for the message)');
         } else {
-            console.log('\n❌ SMS API returned an unexpected response format.');
+            console.log('\n❌ SMS API returned an unexpected response format or failed.');
         }
     } catch (error) {
         console.error('\n❌ SMS API Test Failed!');
