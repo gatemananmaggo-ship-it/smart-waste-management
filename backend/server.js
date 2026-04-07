@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const binRoutes = require('./routes/binRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const workerRoutes = require('./routes/workerRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const Bin = require('./models/Bin');
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/bins', binRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/workers', workerRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root Route
 app.get('/', (req, res) => {

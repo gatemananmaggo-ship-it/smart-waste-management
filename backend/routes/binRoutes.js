@@ -5,6 +5,7 @@ const BinHistory = require('../models/BinHistory');
 const History = require('../models/History'); // New Hub-wide history
 const User = require('../models/User');
 const Worker = require('../models/Worker');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/authMiddleware');
 const smsService = require('../utils/smsService');
 const { calculateDistance } = require('../utils/geoUtils');
@@ -172,7 +173,12 @@ router.patch('/:hardwareId', async (req, res) => {
 
                 const recipients = [];
                 if (ownerUser.phone) {
-                    recipients.push({ name: 'Admin', phone: ownerUser.phone });
+                    recipients.push({ 
+                        id: ownerUser._id, 
+                        name: 'Admin', 
+                        phone: ownerUser.phone, 
+                        type: 'User' 
+                    });
                 }
 
                 let selectedWorker = null;
@@ -180,12 +186,22 @@ router.patch('/:hardwareId', async (req, res) => {
                 // Add the closest worker if available
                 if (workersWithDistance.length > 0) {
                     selectedWorker = workersWithDistance[0];
-                    recipients.push(selectedWorker);
+                    recipients.push({
+                        id: selectedWorker.id,
+                        name: selectedWorker.name,
+                        phone: selectedWorker.phone,
+                        type: 'Worker'
+                    });
                     console.log(`[Algorithm] Selected closest worker: ${selectedWorker.name} (${selectedWorker.distance.toFixed(2)} km away)`);
                 } else if (linkedWorkers.length > 0) {
                     // Fallback: Notify all if no location data
                     linkedWorkers.forEach(worker => {
-                        recipients.push({ name: worker.username, phone: worker.phone });
+                        recipients.push({ 
+                            id: worker._id, 
+                            name: worker.username, 
+                            phone: worker.phone, 
+                            type: 'Worker' 
+                        });
                     });
                     console.log(`[Algorithm] No workers have location data. Alerting all ${linkedWorkers.length} available workers.`);
                 }
@@ -202,9 +218,24 @@ router.patch('/:hardwareId', async (req, res) => {
                 if (recipients.length > 0) {
                     console.log(`[SMS] Triggering alerts for bin ${bin.hardwareId} (${fillLevel}%) to ${recipients.length} recipient(s)`);
                     recipients.forEach(recipient => {
+                        // 1. Send SMS
                         smsService.sendFullBinAlert(recipient.phone, bin.hardwareId, bin.address)
                             .then(() => console.log(`[SMS] Success: Sent to ${recipient.name} at ${recipient.phone}`))
                             .catch(err => console.error(`[SMS] Failed: Could not send to ${recipient.name}:`, err.message));
+                        
+                        // 2. Create In-App Notification
+                        if (recipient.id) {
+                            const newNotif = new Notification({
+                                recipientId: recipient.id,
+                                recipientType: recipient.type,
+                                binId: bin.hardwareId,
+                                message: `Alert: Bin ${bin.hardwareId} is ${fillLevel}% full. Location: ${bin.address}.`,
+                                status: fillLevel >= 100 ? 'Full' : 'High Level'
+                            });
+                            newNotif.save()
+                                .then(() => console.log(`[In-App Notification] Created for ${recipient.name}`))
+                                .catch(err => console.error(`[In-App Notification] Failed:`, err.message));
+                        }
                     });
                 }
             }
