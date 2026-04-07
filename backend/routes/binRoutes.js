@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Worker = require('../models/Worker');
 const auth = require('../middleware/authMiddleware');
 const smsService = require('../utils/smsService');
+const { calculateDistance } = require('../utils/geoUtils');
 
 // GET all bins for the logged-in user
 router.get('/', auth, async (req, res) => {
@@ -151,15 +152,42 @@ router.patch('/:hardwareId', async (req, res) => {
                     phone: { $exists: true, $ne: '' }
                 });
 
-                // Build recipient list (Admin + Workers)
+                // Calculate distances for all available workers (who have location data)
+                const workersWithDistance = linkedWorkers
+                    .filter(w => w.location?.latitude && w.location?.longitude)
+                    .map(worker => ({
+                        name: worker.username,
+                        phone: worker.phone,
+                        distance: calculateDistance(
+                            bin.location.latitude,
+                            bin.location.longitude,
+                            worker.location.latitude,
+                            worker.location.longitude
+                        )
+                    }));
+
+                // Sort by distance (ascending)
+                workersWithDistance.sort((a, b) => a.distance - b.distance);
+
+                // Build recipient list: Admin + Closest Worker
                 const recipients = [];
                 if (ownerUser.phone) {
                     recipients.push({ name: 'Admin', phone: ownerUser.phone });
                 }
                 
-                linkedWorkers.forEach(worker => {
-                    recipients.push({ name: worker.username, phone: worker.phone });
-                });
+                // Add the closest worker if available
+                if (workersWithDistance.length > 0) {
+                    const closest = workersWithDistance[0];
+                    recipients.push(closest);
+                    console.log(`[SMS] Selected closest worker: ${closest.name} (${closest.distance.toFixed(2)} km away)`);
+                } else if (linkedWorkers.length > 0) {
+                    // Fallback: If no workers have location data, but some are available, alert the first one (or all?)
+                    // For now, let's alert all available workers if location data is missing to ensure task coverage.
+                    linkedWorkers.forEach(worker => {
+                        recipients.push({ name: worker.username, phone: worker.phone });
+                    });
+                    console.log(`[SMS] No workers have location data. Alerting all ${linkedWorkers.length} available workers.`);
+                }
 
                 if (recipients.length > 0) {
                     console.log(`[SMS] Triggering alerts for bin ${bin.hardwareId} (${fillLevel}%) to ${recipients.length} recipient(s)`);

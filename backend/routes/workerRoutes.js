@@ -75,4 +75,38 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+// PATCH update worker location
+router.patch('/location', auth, async (req, res) => {
+    try {
+        const { latitude, longitude } = req.body;
+        
+        if (latitude === undefined || longitude === undefined) {
+            return res.status(400).json({ message: 'Latitude and longitude are required.' });
+        }
+
+        // Only workers should be updating their location here
+        if (req.user.role !== 'worker') {
+            return res.status(403).json({ message: 'Only workers can update their location.' });
+        }
+
+        const worker = await Worker.findByIdAndUpdate(
+            req.user.id,
+            {
+                location: { latitude, longitude },
+                lastLocationUpdate: Date.now()
+            },
+            { new: true }
+        ).select('-password');
+
+        if (!worker) {
+            return res.status(404).json({ message: 'Worker not found.' });
+        }
+
+        res.json(worker);
+    } catch (err) {
+        console.error('Worker location update error:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

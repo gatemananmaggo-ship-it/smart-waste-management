@@ -27,6 +27,13 @@ const workerSchema = new mongoose.Schema({
         trim: true,
         description: "The Hub ID this worker is linked to for receiving SMS alerts"
     },
+    location: {
+        latitude: { type: Number },
+        longitude: { type: Number }
+    },
+    lastLocationUpdate: {
+        type: Date
+    },
     createdAt: {
         type: Date,
         default: Date.now

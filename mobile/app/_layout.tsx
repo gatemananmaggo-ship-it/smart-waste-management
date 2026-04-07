@@ -6,6 +6,7 @@ import { View, ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useLocationTracker } from '@/hooks/useLocationTracker';
 import { HubProvider } from '../context/HubContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 
@@ -14,6 +15,9 @@ function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
   const colorScheme = useColorScheme();
+
+  // Activate location tracking for workers
+  useLocationTracker();
 
   useEffect(() => {
     if (isLoading) return;
