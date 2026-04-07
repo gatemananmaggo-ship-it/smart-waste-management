@@ -81,9 +81,17 @@ router.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find user
-        const user = await User.findOne({ username });
+        let user = await User.findOne({ username });
+        let isWorker = false;
+
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            // If not found in User, check Worker
+            const Worker = require('../models/Worker');
+            user = await Worker.findOne({ username });
+            if (!user) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
+            isWorker = true;
         }
 
         // Compare password
@@ -93,15 +101,38 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate JWT token
+        const payload = isWorker ? {
+            id: user._id, 
+            username: user.username, 
+            hubId: user.linkedHubId,
+            role: 'worker'
+        } : { 
+            id: user._id, 
+            username: user.username, 
+            area: user.area_access, 
+            city: user.city, 
+            state: user.state, 
+            place: user.place, 
+            hubId: user.hubId,
+            role: 'admin'
+        };
+
         const token = jwt.sign(
-            { id: user._id, username: user.username, area: user.area_access, city: user.city, state: user.state, place: user.place, hubId: user.hubId },
+            payload,
             process.env.JWT_SECRET || 'secret_key',
             { expiresIn: '1h' }
         );
 
         res.json({
             token,
-            user: {
+            user: isWorker ? {
+                id: user._id,
+                username: user.username,
+                hubId: user.linkedHubId,
+                phone: user.phone,
+                isAvailable: user.isAvailable,
+                role: 'worker'
+            } : {
                 id: user._id,
                 username: user.username,
                 email: user.email,
@@ -111,7 +142,8 @@ router.post('/login', async (req, res) => {
                 place: user.place,
                 hubId: user.hubId,
                 phone: user.phone,
-                isAvailable: user.isAvailable
+                isAvailable: user.isAvailable,
+                role: 'admin'
             }
         });
     } catch (err) {
