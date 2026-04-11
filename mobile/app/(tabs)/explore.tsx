@@ -132,8 +132,12 @@ export default function ListViewScreen() {
       setShowPhoneModal(false);
       Alert.alert("Success", "Phone number updated successfully!");
     } catch (err: any) {
-      console.error("Error updating phone:", err);
-      Alert.alert("Error", err.response?.data?.message || "Failed to update phone number.");
+      console.error("Error updating phone:", err.message);
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        Alert.alert("Error", err.response?.data?.message || "Failed to update phone number.");
+      }
     } finally {
       setIsUpdatingPhone(false);
     }
@@ -150,8 +154,12 @@ export default function ListViewScreen() {
       await updateUser({ isAvailable: value });
       Alert.alert("Success", `SMS Alerts ${value ? 'enabled' : 'disabled'} successfully!`);
     } catch (err: any) {
-      console.error("Error updating availability:", err);
-      Alert.alert("Error", err.response?.data?.message || "Failed to update availability.");
+      console.error("Error updating availability:", err.message);
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        Alert.alert("Error", err.response?.data?.message || "Failed to update availability.");
+      }
       setIsAvailable(!value); // Revert state on error
     } finally {
       setIsUpdatingAvailability(false);

@@ -18,7 +18,7 @@ export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
 
   const fetchNotifications = async () => {
     if (!token) return;
@@ -27,8 +27,11 @@ export default function NotificationsScreen() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(response.data);
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
+    } catch (err: any) {
+      console.error("Error fetching notifications:", err.message);
+      if (err.response?.status === 401) {
+        logout();
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

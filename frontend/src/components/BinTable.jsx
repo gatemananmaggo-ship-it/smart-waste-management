@@ -76,10 +76,10 @@ const BinTable = ({ bins, onEmptyBin, onRemoveBin }) => {
                                                 alignItems: 'center', justifyContent: 'center', color: '#38bdf8',
                                                 fontSize: '0.7rem', fontWeight: 700
                                             }}>
-                                                {bin.assignedWorker.username.charAt(0).toUpperCase()}
+                                                {(bin.assignedWorker.username || '?').charAt(0).toUpperCase()}
                                             </div>
                                             <span style={{ fontSize: '0.85rem', color: 'white', fontWeight: 500 }}>
-                                                {bin.assignedWorker.username}
+                                                {bin.assignedWorker.username || 'Unknown Worker'}
                                             </span>
                                         </div>
                                     ) : (

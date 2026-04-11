@@ -9,7 +9,7 @@ import axios from 'axios';
  * Only runs if the user is authenticated and has the 'worker' role.
  */
 export const useLocationTracker = () => {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const lastSentLocation = useRef<{ latitude: number, longitude: number } | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
 
@@ -66,8 +66,11 @@ export const useLocationTracker = () => {
         );
 
         lastSentLocation.current = { latitude, longitude };
-      } catch (error) {
-        console.error('Failed to report location to server:', error);
+      } catch (error: any) {
+        console.error('Failed to report location to server:', error.message);
+        if (error.response?.status === 401) {
+          logout();
+        }
       }
     };
 

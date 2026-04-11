@@ -12,36 +12,69 @@ const char* binId = "BIN-001"; // Unique ID for this bin
 const int SLEEP_SECONDS = 120; // 2 minutes (120 seconds)
 
 // HC-SR04 Pin Definitions
-const int TRIG_PIN = D1; // GPIO5
-const int ECHO_PIN = D3; // GPIO0
+const int TRIG_PIN = D3; // GPIO0
+const int ECHO_PIN = D2; // GPIO4
 
 // LoRa RA-02 SPI Pin Definitions
-const int NSS_PIN = D8;  // GPIO15 (CS)
-const int RST_PIN = D4;  // GPIO2  (Reset)  -- Changed from D0 to allow Deep Sleep Wake!
-const int DIO0_PIN = D2; // GPIO4  (IRQ)
+const int NSS_PIN = D4;  // GPIO2  (CS) - Moved from D8 (GPIO15) to prevent "waiting for host" boot crash
+const int RST_PIN = D0;  // GPIO16 (Reset) - Moved from D4 to match Gateway and prevent boot issues
+const int DIO0_PIN = D1; // GPIO5  (IRQ)
 
 // Distance Calibration (cm)
 const int MAX_DISTANCE = 50; 
 const int MIN_DISTANCE = 5;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(74880); // Using 74880 to exactly match the hardware bootloader's baud rate.
+  
+  // Force NSS HIGH immediately to prevent SPI noise interference during boot
+  pinMode(D4, OUTPUT);
+  digitalWrite(D4, HIGH);
+  
+  delay(2000); // Wait for Serial Monitor to catch up and power to stabilize
   
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
 
-  Serial.println("\n--- Bin Transmitter Initialized ---");
+  Serial.println("\n====================================");
+  Serial.println("   ESPMART LoRa TRANSMITTER BOOT   ");
+  Serial.println("====================================");
   
   // 1. Initialize LoRa
+  Serial.println("Performing Manual Reset of LoRa module...");
+  pinMode(RST_PIN, OUTPUT);
+  digitalWrite(RST_PIN, LOW);
+  delay(100);
+  digitalWrite(RST_PIN, HIGH);
+  delay(100);
+
+  SPI.begin(); 
   LoRa.setPins(NSS_PIN, RST_PIN, DIO0_PIN);
+  LoRa.setSPIFrequency(1000000); // 1MHz for stability (matched with gateway)
   
-  // Start LoRa at 433 MHz
+  Serial.println("Attempting to connect to LoRa module at 433 MHz...");
+  
   if (!LoRa.begin(433E6)) {
-    Serial.println("Starting LoRa failed! Check wiring / power.");
-    while (1); // Halt execution if LoRa fails
+    Serial.println("------------------------------------");
+    Serial.println("CRITICAL ERROR: Starting LoRa failed!");
+    Serial.println("Check Physical Wiring:");
+    Serial.println("  NSS  -> D4");
+    Serial.println("  SCK  -> D5");
+    Serial.println("  MISO -> D6");
+    Serial.println("  MOSI -> D7");
+    Serial.println("  RST  -> D0");
+    Serial.println("  DIO0 -> D1");
+    Serial.println("------------------------------------");
+    Serial.println("Retrying in 5 seconds...");
+    delay(5000);
+    ESP.restart(); // Restart the board instead of hanging to prevent WDT reset
   }
   Serial.println("LoRa RA-02 Initialized Successfully!");
   
+  Serial.println("Starting continuous loop mode...");
+}
+
+void loop() {
   // 2. Measure Distance
   long duration;
   float distanceCm;
@@ -53,6 +86,7 @@ void setup() {
   digitalWrite(TRIG_PIN, LOW);
   
   duration = pulseIn(ECHO_PIN, HIGH);
+  // Speed of sound wave divided by 2 (go and back)
   distanceCm = duration * 0.034 / 2;
 
   if (duration == 0) {
@@ -66,13 +100,19 @@ void setup() {
     if (fillLevel >= 90) status = "Full";
     else if (fillLevel <= 10) status = "Empty";
 
-    Serial.printf("Distance: %.2f cm | Fill: %d%%\n", distanceCm, fillLevel);
+    Serial.println("------------------------------------");
+    Serial.println("Bin Status Update:");
+    Serial.print("  Bin ID     : "); Serial.println(binId);
+    Serial.print("  Distance   : "); Serial.print(distanceCm); Serial.println(" cm");
+    Serial.print("  Fill Level : "); Serial.print(fillLevel); Serial.println("%");
+    Serial.print("  Status     : "); Serial.println(status);
+    Serial.println("------------------------------------");
 
     // 4. Send over LoRa via SPI
     // Format: BIN_ID,FILL_LEVEL,STATUS
     String payload = String(binId) + "," + String(fillLevel) + "," + status;
     
-    Serial.print("Sending LoRa Packet: ");
+    Serial.print(">> Sending LoRa Packet: ");
     Serial.println(payload);
     
     // Transmit packet byte-by-byte instantly
@@ -80,18 +120,13 @@ void setup() {
     LoRa.print(payload);
     LoRa.endPacket();
     
-    Serial.println("Packet Send Complete!");
-    delay(500); // Give LoRa module time to power down cleanly
+    Serial.println(">> Packet Sent Successfully!");
   }
 
-  // 5. Enter Deep Sleep
-  Serial.println("Going to Deep Sleep for 2 minutes...");
+  // 5. Wait before next reading
+  Serial.println("\nWaiting for " + String(SLEEP_SECONDS) + " seconds before next update...");
+  Serial.flush();
   
-  // WARNING: To wake up from deep sleep on a NodeMCU ESP8266,
-  // YOU MUST physically wire pin D0 (GPIO16) to the RST pin!
-  ESP.deepSleep(SLEEP_SECONDS * 1000000); 
-}
-
-void loop() {
-  // Never reached due to Deep Sleep architecture
+  // Wait using standard delay
+  delay(SLEEP_SECONDS * 1000); 
 }
