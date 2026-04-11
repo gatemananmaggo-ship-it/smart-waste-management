@@ -44,29 +44,8 @@ const BinMap = ({ bins, height = '450px' }) => {
             });
         }
 
-        // 2. Fetch coordinates for user's registered city/place
-        if (user && user.city) {
-            const fetchCityCoords = async () => {
-                try {
-                    const query = `${user.place}, ${user.city}, ${user.state}, India`;
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-                    const data = await response.json();
-                    
-                    if (data && data.length > 0) {
-                        setMapCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-                    } else {
-                        const cityResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(user.city + ', ' + user.state)}&limit=1`);
-                        const cityData = await cityResponse.json();
-                        if (cityData && cityData.length > 0) {
-                            setMapCenter([parseFloat(cityData[0].lat), parseFloat(cityData[0].lon)]);
-                        }
-                    }
-                } catch (err) {
-                    console.error("Geocoding error:", err);
-                }
-            };
-            fetchCityCoords();
-        }
+        // 2. We skip Nominatim geocoding here to prevent CORS errors on the live deployment.
+        // The map will automatically center to the user's bins using the <FitBounds /> component below.
     }, [user]);
 
     // Recenter map when bins change
