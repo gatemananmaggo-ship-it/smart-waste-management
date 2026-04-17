@@ -107,16 +107,25 @@ router.patch('/:hardwareId', async (req, res) => {
         if (batteryLevel !== undefined) updateData.batteryLevel = Number(batteryLevel);
         if (status !== undefined) updateData.status = status.trim();
 
+        console.log(`[IoT Update] Attempting to update bin: ${hardwareId} with data:`, updateData);
+
+        // Use case-insensitive search to be safe
         const bin = await Bin.findOneAndUpdate(
-            { hardwareId: hardwareId },
+            { hardwareId: { $regex: new RegExp(`^${hardwareId}$`, 'i') } },
             updateData,
             { returnDocument: 'after' }
         );
 
         if (!bin) {
-            console.warn(`[IoT Update] Bin not found: ${hardwareId}`);
-            return res.status(404).json({ message: 'Bin not found' });
+            console.warn(`[IoT Update] Bin NOT FOUND in database: ${hardwareId}`);
+            return res.status(404).json({ 
+                message: 'Bin not found', 
+                receivedHardwareId: hardwareId,
+                hint: "Check if the Hardware ID matches exactly (case-insensitive) in the dashboard."
+            });
         }
+
+        console.log(`[IoT Update] Successfully updated bin: ${bin.hardwareId} (_id: ${bin._id})`);
 
         // Log to history
         const history = new BinHistory({
