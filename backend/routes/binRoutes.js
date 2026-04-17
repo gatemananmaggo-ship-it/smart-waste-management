@@ -95,19 +95,28 @@ router.post('/', auth, async (req, res) => {
 // PATCH update bin status
 router.patch('/:hardwareId', async (req, res) => {
     try {
+        const { hardwareId } = req.params;
         const { fillLevel, batteryLevel, status } = req.body;
+        
+        console.log(`[IoT Update] Incoming for ${hardwareId}:`, { fillLevel, batteryLevel, status });
+
+        // Build update object dynamically to avoid overwriting with undefined
+        const updateData = { lastUpdated: Date.now() };
+        
+        if (fillLevel !== undefined) updateData.fillLevel = Number(fillLevel);
+        if (batteryLevel !== undefined) updateData.batteryLevel = Number(batteryLevel);
+        if (status !== undefined) updateData.status = status.trim();
+
         const bin = await Bin.findOneAndUpdate(
-            { hardwareId: req.params.hardwareId },
-            {
-                fillLevel,
-                batteryLevel,
-                status,
-                lastUpdated: Date.now()
-            },
+            { hardwareId: hardwareId },
+            updateData,
             { returnDocument: 'after' }
         );
 
-        if (!bin) return res.status(404).json({ message: 'Bin not found' });
+        if (!bin) {
+            console.warn(`[IoT Update] Bin not found: ${hardwareId}`);
+            return res.status(404).json({ message: 'Bin not found' });
+        }
 
         // Log to history
         const history = new BinHistory({
@@ -122,11 +131,15 @@ router.patch('/:hardwareId', async (req, res) => {
         if (io) {
             const ownerUser = await User.findById(bin.owner);
             if (ownerUser) {
+                console.log(`[IoT Update] Emitting update to hub: ${ownerUser.hubId}`);
                 io.to(ownerUser.hubId).emit('binUpdate', bin);
 
                 // Update Hub History (Average fill level)
                 const allBins = await Bin.find({ owner: bin.owner });
-                const avgFill = allBins.reduce((sum, b) => sum + b.fillLevel, 0) / allBins.length;
+                const validBins = allBins.filter(b => b.fillLevel !== undefined);
+                const avgFill = validBins.length > 0 
+                    ? validBins.reduce((sum, b) => sum + b.fillLevel, 0) / validBins.length 
+                    : 0;
                 
                 const hubHistory = new History({
                     hubId: ownerUser.hubId,
