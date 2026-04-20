@@ -35,3 +35,14 @@ node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-ep
 for bin-003 to be filled up to 75%
 
 node -e "const axios = require('axios'); axios.patch('https://smart-waste-api-epmw.onrender.com/api/bins/BIN-003', { fillLevel: 75, status: 'Filling' }).then(r => console.log('Successfully updated BIN-003')).catch(e => { if (e.response && e.response.status === 404) { axios.post('https://smart-waste-api-epmw.onrender.com/api/bins', { hardwareId: 'BIN-003', address: 'AKGEC Campus', location: { latitude: 28.6757, longitude: 77.5020 }, fillLevel: 75, status: 'Filling' }).then(r => console.log('Successfully created BIN-003')).catch(e2 => console.error('Failed:', e2.message)); } else { console.error('Failed:', e.message); } })"
+
+
+
+Branch             production
+Runtime version    1.0.0
+Platform           android
+Update group ID    a70fe446-9097-43cf-a3f4-de7e4afd058fafd058f                                         101448e
+Android update ID  019d9c52-3287-752b-b267-a9f41101448e                                         ad044c6aec8*
+Message            Fixed API URL (Mobile Only)  an2410182s-organization/projects/eco-clou
+Commit             5c1ecf8f34114db1c17928b453bb8ad044c6aec8*
+EAS Dashboard      https://expo.dev/accounts/mannagement\mobile>an2410182s-organization/projects/eco-cloud/updates/a70fe446-9097-43cf-a3f4-de7e4afd058f

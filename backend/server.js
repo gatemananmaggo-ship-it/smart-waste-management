@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173", "https://13-232-18-222.sslip.io", "http://13.232.18.222:5000"],
+        origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173", "https://13-232-18-222.sslip.io", "http://13.232.18.222.sslip.io", "http://13.232.18.222:5000"],
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     },
@@ -27,7 +27,7 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-    origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173", "https://13-232-18-222.sslip.io", "http://13.232.18.222:5000"],
+    origin: ["https://smart-waste-web-glpp.onrender.com", "http://localhost:5173", "https://13-232-18-222.sslip.io", "http://13.232.18.222.sslip.io", "http://13.232.18.222:5000"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }));

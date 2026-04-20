@@ -62,6 +62,9 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "owner": "manan2410182s-organization"
+    "owner": "manan2410182s-organization",
+    "updates": {
+      "url": "https://u.expo.dev/dace32e3-260a-4d2d-b45f-5a70362ff2d4"
+    }
   }
 }
