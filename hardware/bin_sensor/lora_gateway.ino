@@ -10,8 +10,8 @@
 #include <SPI.h>
 
 // --- CONFIGURATION ---
-const char *ssid = "Gaurav's wifi";
-const char *password = "1234567890";
+const char *ssid = "Airtel_Samar_5g";
+const char *password = "Maggosamar0383@";
 const char *serverBaseUrl = "http://13.232.18.222:5000";
 
 // LoRa RA-02 SPI Pin Definitions
