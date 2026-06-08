@@ -1,5 +1,5 @@
 // Centralized API configuration for the frontend
-const IS_LOCAL = false; // Temporary switch to test new features locally
+const IS_LOCAL = true; // Temporary switch to test new features locally
 
 const LOCAL_URL = 'http://localhost:5000';
 const LIVE_URL = 'https://13-232-18-222.sslip.io';

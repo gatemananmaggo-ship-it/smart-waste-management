@@ -38,7 +38,10 @@ const translations = {
         light: "Light",
         system_status: "System Status",
         all_systems_online: "All Systems Online",
-        workers: "Workers"
+        workers: "Workers",
+        easy_monitor: "Easy Monitor",
+        no_worker_assigned: "No Worker Assigned",
+        needs_collection: "Needs Collection"
     },
     hi: {
         overview: "अवलोकन",
@@ -77,7 +80,10 @@ const translations = {
         light: "लाइट",
         system_status: "सिस्टम की स्थिति",
         all_systems_online: "सभी सिस्टम ऑनलाइन हैं",
-        workers: "कर्मचारी"
+        workers: "कर्मचारी",
+        easy_monitor: "सरल मॉनिटर",
+        no_worker_assigned: "कोई कर्मचारी नियुक्त नहीं",
+        needs_collection: "तुरंत सफाई की आवश्यकता"
     },
     bn: {
         overview: "সংক্ষিপ্ত বিবরণ",
@@ -116,7 +122,10 @@ const translations = {
         light: "লাইট",
         system_status: "সিস্টেম স্ট্যাটাস",
         all_systems_online: "সমস্ত সিস্টেম অনলাইন",
-        workers: "কর্মচারী"
+        workers: "কর্মচারী",
+        easy_monitor: "সহজ মনিটর",
+        no_worker_assigned: "কোন কর্মচারী নিযুক্ত নেই",
+        needs_collection: "তাত্ক্ষণিক সংগ্রহ প্রয়োজন"
     },
     te: {
         overview: "అవలోకనం",
@@ -155,7 +164,10 @@ const translations = {
         light: "లైట్",
         system_status: "సిస్టమ్ స్థితి",
         all_systems_online: "అన్ని సిస్టమ్స్ ఆన్లైన్",
-        workers: "కార్మికులు"
+        workers: "కార్మికులు",
+        easy_monitor: "సులభమైన మానిటర్",
+        no_worker_assigned: "కార్మికుడు కేటాయించబడలేదు",
+        needs_collection: "వెంటనే సేకరించడం అవసరం"
     },
     mr: {
         overview: "आढावा",
@@ -194,7 +206,10 @@ const translations = {
         light: "लाईट",
         system_status: "सिस्टम स्थिती",
         all_systems_online: "सर्व सिस्टम ऑनलाइन",
-        workers: "कामगार"
+        workers: "कामगार",
+        easy_monitor: "सुलभ मॉनिटर",
+        no_worker_assigned: "कोणताही कामगार नियुक्त नाही",
+        needs_collection: "त्वरित कचरा गोळा करणे आवश्यक"
     },
     ta: {
         overview: "மேலோட்டம்",
@@ -233,7 +248,10 @@ const translations = {
         light: "லைட்",
         system_status: "கணினி நிலை",
         all_systems_online: "அனைத்து அமைப்புகளும் ஆன்லைனில்",
-        workers: "பணியாளர்கள்"
+        workers: "பணியாளர்கள்",
+        easy_monitor: "எளிய மானிட்டர்",
+        no_worker_assigned: "பணியாளர் நியமிக்கப்படவில்லை",
+        needs_collection: "உடனடி சேகரிப்பு தேவை"
     }
 };
 

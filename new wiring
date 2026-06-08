@@ -1,0 +1,99 @@
+# Implementation Plan: LoRa V2 Hardware Upgrade & Robust Wiring Map
+
+This plan details the migration of the Smart Waste Management LoRa firmware to **Version 2**. It addresses crucial power management, collision avoidance, regional frequency, security, and hardware boot stability issues. It also integrates the **SW-420 Vibration Sensor** to handle transient readings, animal/vandalism interference, and sanitation emptying alerts.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Boot Pin Safety Constraints:** ESP8266 has strict boot pin states:
+> * `GPIO15 (D8)` must be **LOW** during boot.
+> * `GPIO0 (D3)` and `GPIO2 (D4)` must be **HIGH** during boot.
+> * We have carefully mapped the pins below so that default sensor behaviors (like HC-SR04 Echo pulling LOW) align with these boot requirements to prevent boot-loops.
+>
+> **Deep Sleep Hardware Link:**
+> * For the transmitter to wake up from deep sleep, a physical wire **MUST** connect **D0 (GPIO16)** to the NodeMCU's **RST** pin.
+> * The LoRa module's `RST` pin will be tied directly to the NodeMCU's **RST** pin line. This ensures the LoRa module resets automatically whenever the NodeMCU boots up or wakes from deep sleep, without wasting an extra GPIO.
+
+---
+
+## Proposed Changes
+
+We will create two new, upgraded firmware files under `hardware/bin_sensor/` and a new circuit diagram reference file:
+
+### Hardware Components
+
+1. **NodeMCU ESP8266 V2 Transmitter Node**
+2. **LoRa RA-02 Module (Configured for 865 MHz - India license-free band)**
+3. **HC-SR04 Ultrasonic Distance Sensor**
+4. **SW-420 Vibration Sensor**
+5. **TP4056 Charger & MT3608 Boost Converter (5V output calibrated)**
+6. **3.7V Li-Ion Battery**
+
+---
+
+### Component 1: Upgraded Wiring Maps
+
+#### [NEW] [lora_ra02_circuit_v2.md](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/hardware/lora_ra02_circuit_v2.md)
+We will document the updated circuit connections to resolve boot and sleep issues.
+
+##### Transmitter Node Wiring (Battery Powered + Vibration Sensor + Deep Sleep)
+
+| From Component | Pin | To NodeMCU / Power Pin | Purpose / Notes |
+| :--- | :--- | :--- | :--- |
+| **NodeMCU** | **D0 (GPIO16)** | **RST** | **Deep Sleep Wake-up loop** (Critical link) |
+| **LoRa RA-02** | 3.3V | 3V3 | Power supply (Needs clean 3.3V) |
+| | GND | GND | Common Ground |
+| | SCK | D5 (GPIO14) | SPI Hardware Clock |
+| | MISO | D6 (GPIO12) | SPI Hardware MISO |
+| | MOSI | D7 (GPIO13) | SPI Hardware MOSI |
+| | NSS (CS) | D4 (GPIO2) | SPI Chip Select (Pulled HIGH during boot, safe) |
+| | RST | **RST** | Resets automatically when NodeMCU resets |
+| | DIO0 | D2 (GPIO4) | Interrupt line |
+| **HC-SR04** | VCC | 5V (from MT3608 VOUT+) | Sensor power |
+| | GND | GND | Common Ground |
+| | Trig | D3 (GPIO0) | Trigger pulse input (Pulled HIGH on boot, safe) |
+| | Echo | D8 (GPIO15) | Echo output (Defaults to LOW on boot, safe) |
+| **SW-420** | VCC | 3V3 | Sensor power |
+| | GND | GND | Common Ground |
+| | DO (Digital Out)| D1 (GPIO5) | Vibration state output (No boot constraints) |
+
+---
+
+### Component 2: Upgraded Transmitter Firmware
+
+#### [NEW] [lora_transmitter_v2.ino](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/hardware/bin_sensor/lora_transmitter_v2.ino)
+This firmware replaces the `delay()` loop with deep sleep and adds multiple logical enhancements:
+1. **Regional Frequency**: Switched to `865E6` (865 MHz) for regulatory compliance in India.
+2. **Deep Sleep**: Enters true low-power mode (`ESP.deepSleep()`) between readings.
+3. **Vibration-Triggered Reading**: 
+   * When the node wakes up, it reads the SW-420 status.
+   * If a vibration occurred, it waits for it to settle before reading the ultrasonic level (filters out hands/falling items).
+   * If the vibration is massive/sustained, it can trigger an instant "Emptied" or "Tampered" status.
+4. **Collision Avoidance (Carrier Sense)**: Listens to the channel before transmitting. If RSSI indicates the channel is busy, it waits a random backoff time to prevent colliding with other bins.
+5. **Basic Checksums/Header**: Formats packets with simple validation identifiers to prevent receiving junk signals.
+
+---
+
+### Component 3: Upgraded Gateway Firmware
+
+#### [NEW] [lora_gateway_v2.ino](file:///c:/Users/DELL/OneDrive/Desktop/smart-waste-management/hardware/bin_sensor/lora_gateway_v2.ino)
+This firmware receives reports from the V2 transmitter:
+1. **Regional Frequency**: Configured to `865E6` (865 MHz).
+2. **Packet Verification**: Verifies transmitter headers/checksums to ignore random RF noise.
+3. **Audit Logging**: Receives the `"Emptied"` status packets and routes them to the backend API.
+4. **Diagnostic Reports**: Prints RSSI and SNR logs for signal diagnostic assessment.
+
+---
+
+## Verification Plan
+
+### Automated/Compilation Tests
+* Open Arduino IDE or run CLI checks on the new `.ino` files to ensure they compile with standard `<SPI.h>` and `<LoRa.h>` libraries without syntax errors.
+
+### Manual Verification
+1. **Boot Check**: Power on the NodeMCU with the updated wiring. Confirm the board boots normally and does not get stuck in a bootloader loop.
+2. **Deep Sleep Check**: Use a multimeter to verify current draw drops to micro-amps during the sleep interval.
+3. **Vibration Logic Check**: Knock/shake the bin, verify that the transmitter registers the vibration and transmits the update correctly.
+4. **Gateway Check**: Monitor the gateway's Serial Monitor at `115200` baud. Ensure it successfully intercepts the `865 MHz` packets, decodes the comma-separated text, and issues a successful `PATCH` request to the backend.

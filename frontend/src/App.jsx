@@ -14,6 +14,7 @@ import Register from './components/Register';
 import Settings from './components/Settings';
 import WorkersManagement from './components/WorkersManagement';
 import AddWorkerModal from './components/AddWorkerModal';
+import BinMonitor from './components/BinMonitor';
 import { useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import CONFIG from './config';
@@ -299,6 +300,14 @@ function App() {
 
   const renderContent = () => {
     switch (activeView) {
+      case 'easy_monitor':
+        return (
+          <BinMonitor 
+            bins={bins} 
+            onEmptyBin={handleEmptyBin} 
+            onViewChange={setActiveView} 
+          />
+        );
       case 'map':
         return (
           <div className="grid grid-cols-1">

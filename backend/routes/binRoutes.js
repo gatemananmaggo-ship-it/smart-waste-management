@@ -14,7 +14,7 @@ const { calculateDistance } = require('../utils/geoUtils');
 router.get('/', auth, async (req, res) => {
     try {
         console.log('Fetching bins for user ID:', req.user.id);
-        const bins = await Bin.find({ owner: req.user.id }).populate('assignedWorker', 'username');
+        const bins = await Bin.find({ owner: req.user.id }).populate('assignedWorker', 'username phone isAvailable');
         console.log(`Found ${bins.length} bins for user ${req.user.id}`);
         
         // Fetch Hub-wide history for trends

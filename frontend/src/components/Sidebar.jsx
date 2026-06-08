@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Map as MapIcon, BarChart3, Trash2, Settings, AlertTriangle, LogOut, User, Users } from 'lucide-react';
+import { LayoutDashboard, Map as MapIcon, BarChart3, Trash2, Settings, AlertTriangle, LogOut, User, Users, Monitor } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -8,6 +8,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
     const { t } = useLanguage();
     const menuItems = [
         { id: 'overview', icon: LayoutDashboard, label: t('overview') },
+        { id: 'easy_monitor', icon: Monitor, label: t('easy_monitor') },
         { id: 'map', icon: MapIcon, label: t('live_map') },
         { id: 'analytics', icon: BarChart3, label: t('analytics') },
         { id: 'bins', icon: Trash2, label: t('smart_bins') },
